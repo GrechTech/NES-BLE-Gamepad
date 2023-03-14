@@ -2,12 +2,12 @@
 --PIN MAP--
 -----------
 
-ESP32   /   Zapper     (Colour)    /   Level Shifter
---------------------------------------------------
-21      /   Light   (Yellow)    /   3V3->5V
-19      /   Trigger   (Black)     /   3V3->5V
-5V      /   5V      (Red)       /   
-GND     /   GND     (White)     /   
+ESP32   /   Zapper     (Colour)     
+------------------------------------
+21      /   Light       (Yellow)    
+19      /   Trigger     (Black)     
+5V      /   5V          (Red)          
+GND     /   GND         (White)        
 
       .--               
 GND --|O \            White
