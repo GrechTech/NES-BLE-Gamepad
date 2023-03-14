@@ -18,21 +18,13 @@ void loop()
   if (bleGamepad.isConnected())
   {
     if(digitalRead(LIGHT_PIN))
-    {
       bleGamepad.press(BUTTON_1);
-    }
     else
-    {
       bleGamepad.release(BUTTON_1);
-    }
 
     if(digitalRead(TRIGGER_PIN))
-    {
       bleGamepad.press(BUTTON_2);
-    }
     else
-    {
       bleGamepad.release(BUTTON_2);
-    }
   }
 }
