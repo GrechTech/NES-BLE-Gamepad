@@ -1,4 +1,5 @@
 [WIP]
+Uses library https://github.com/lemmingDev/ESP32-BLE-Gamepad from https://github.com/lemmingDev/
 
 -----------
 -- PARTS --

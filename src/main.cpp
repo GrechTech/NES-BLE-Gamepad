@@ -1,10 +1,10 @@
 #include <Arduino.h>
 #include <BleGamepad.h> // https://github.com/lemmingDev/ESP32-BLE-Gamepad
 
-static const int LIGHT_PIN = 21;	
+static const int LIGHT_PIN = 21;	//ESP32 IO pins
 static const int TRIGGER_PIN = 19;
 
-BleGamepad bleGamepad("NES-Zapper", "GrechTech", 100);
+BleGamepad bleGamepad("NES-Zapper", "GrechTech", 100); //Initialise Bluetooth gamepad
 
 void setup()
 {
