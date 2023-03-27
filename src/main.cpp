@@ -7,6 +7,7 @@ static const int TRIGGER_PIN = 19; // any input pins with pullups will work
 BleGamepad bleGamepad("NES-Zapper", "GrechTech", 100); // Initialise Bluetooth gamepad
 BleGamepadConfiguration bleGamepadConfig;     // Create a BleGamepadConfiguration object to store all of the options
 
+#define DEBUG
 void setup()
 {
   pinMode(LIGHT_PIN, INPUT_PULLUP);
@@ -15,8 +16,8 @@ void setup()
   
   bleGamepadConfig.setButtonCount(2); // Simplify the HID report 
   bleGamepadConfig.setHatSwitchCount(0); // to just the 2 buttons required
-  bleGamepadConfig.setIncludeXAxis(false); // with no HAT or analogue inputs
-  bleGamepadConfig.setIncludeYAxis(false);
+  //bleGamepadConfig.setIncludeXAxis(false); // with no HAT or analogue inputs
+  //bleGamepadConfig.setIncludeYAxis(false);
   bleGamepadConfig.setIncludeZAxis(false);
   bleGamepadConfig.setIncludeRxAxis(false);
   bleGamepadConfig.setIncludeRyAxis(false);
@@ -27,6 +28,7 @@ void setup()
   bleGamepadConfig.setAutoReport(false); // Manually handle reports, for performance
 
   bleGamepad.begin(&bleGamepadConfig);
+  #
   Serial.begin(115200);
   Serial.println("Start");
 }
