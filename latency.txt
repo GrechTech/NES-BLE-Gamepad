@@ -1,0 +1,13 @@
+Using methodology outlined here https://github.com/GamingNJncos/BLE-3D-Saturn-Public/tree/main/BlueRetro_Latency_Testing
+More information: https://hackaday.io/project/170365-blueretro/log/187443-2020-12-26-update-latency-tests-release-v010
+
+1) Flash Arduino Pro Micro with https://github.com/misteraddons/inputlatency/blob/main/arduino/MiSTer_USB_Latency_Test_Lemonici/MiSTer_USB_Latency_Test_Lemonici.ino
+2) Disconnect USB from Pro Micro and connect Pro Micro Pin 5 to BLE-NES-Zapper Pin 19
+3) Flash BlueRetro with "parallel_1P_external.bin"
+4) Connect BlueRetro IO26 to Pro Micro Pin 2
+5) Using Chrome Browser connect to BlueRetro over bluetooth and in Presets Config set the Mapping Config profile to "Latency Test" (Note: There is a "Test" profile in the second box - do not use this)
+6) Connect to the serial console of the Pro Micro COM port (115200 - 8 n 1)
+7) Power on BLE-NES-Zapper
+8) Check your Serial console to the Pro Micro and confirm it is incrimenting. If so Allow 10k+ itterations to complete to get your latency data.
+
+Parsing data: https://gist.github.com/darthcloud/c1d2b1bb807378410aa215b1b6d7cf0b
