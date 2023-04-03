@@ -9,5 +9,8 @@ More information: https://hackaday.io/project/170365-blueretro/log/187443-2020-1
 6) Connect to the serial console of the Pro Micro COM port (115200 - 8 n 1)
 7) Power on BLE-NES-Zapper
 8) Check your Serial console to the Pro Micro and confirm it is incrimenting. If so Allow 10k+ itterations to complete to get your latency data.
+9) Import monitor output to Excel as CSV data
 
-Parsing data: https://gist.github.com/darthcloud/c1d2b1bb807378410aa215b1b6d7cf0b
+RESULTS:
+Average: 7.5 ms
+Standard deviation: 3.7 ms

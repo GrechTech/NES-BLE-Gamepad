@@ -1,24 +1,32 @@
 #include <Arduino.h>
 #include <BleGamepad.h> // https://github.com/lemmingDev/ESP32-BLE-Gamepad
 
+//#define DEBUG
+
 static const int LIGHT_PIN = 21;	// ESP32 IO pins
 static const int TRIGGER_PIN = 19; // any input pins with pullups will work
+
+bool Light = true;
+bool Trigger = false;
+bool Changed = false;
 
 BleGamepad bleGamepad("NES-Zapper", "GrechTech", 100); // Initialise Bluetooth gamepad
 BleGamepadConfiguration bleGamepadConfig;     // Create a BleGamepadConfiguration object to store all of the options
 
-#define DEBUG
 void setup()
 {
+#ifdef DEBUG
+  Serial.begin(115200);
+  Serial.print("Start");
+#endif
+
   pinMode(LIGHT_PIN, INPUT_PULLUP);
   pinMode(TRIGGER_PIN, INPUT_PULLUP); // Tomee Zapp has a simple switch NC to GND. 
   // When trigger pulled, switch disconnected from GND allowing it to be pulled up
-  
-  bleGamepadConfig.setButtonCount(2); // Simplify the HID report 
-  bleGamepadConfig.setHatSwitchCount(0); // to just the 2 buttons required
-  //bleGamepadConfig.setIncludeXAxis(false); // with no HAT or analogue inputs
-  //bleGamepadConfig.setIncludeYAxis(false);
-  bleGamepadConfig.setIncludeZAxis(false);
+
+  bleGamepadConfig.setButtonCount(12); 
+  bleGamepadConfig.setHatSwitchCount(1);
+  bleGamepadConfig.setIncludeZAxis(false); // Simplify the HID report 
   bleGamepadConfig.setIncludeRxAxis(false);
   bleGamepadConfig.setIncludeRyAxis(false);
   bleGamepadConfig.setIncludeRzAxis(false);
@@ -28,67 +36,63 @@ void setup()
   bleGamepadConfig.setAutoReport(false); // Manually handle reports, for performance
 
   bleGamepad.begin(&bleGamepadConfig);
-  #
-  Serial.begin(115200);
-  Serial.println("Start");
-}
 
-bool LIGHT_STATE = false;	// ESP32 IO pins
-bool TRIGGER_STATE = false; // any input pins with pullups will work
-bool STATE_CHANGE = false; // any input pins with pullups will work
-bool connected = false;
+  //Send first report
+  bleGamepad.release(BUTTON_1);
+  bleGamepad.release(BUTTON_2);
+  bleGamepad.sendReport();
+}
 
 void loop()
 {
   if (bleGamepad.isConnected())
   {
-    if(!connected)
+    Changed = false;
+
+    if(digitalRead(LIGHT_PIN) && !Light) 
     {
-      Serial.println("Connected");
-      connected = true;
+      Light = true;
+      bleGamepad.release(BUTTON_1); //Inverted Light Pin
+      Changed = true;
+      #ifdef DEBUG
+        Serial.println("Light Off");
+      #endif
     }
-
-    STATE_CHANGE = false;
-    bool Light = digitalRead(LIGHT_PIN);
-    bool Trigger = digitalRead(TRIGGER_PIN);
-
-    // Check if a state has changed
-    if( (Light != LIGHT_STATE) || (Trigger != TRIGGER_STATE) )
-        STATE_CHANGE = true;
-
-    LIGHT_STATE = Light;
-    TRIGGER_STATE = Trigger;
-
-    if(STATE_CHANGE) // Only send report if state changed
+    else if(!digitalRead(LIGHT_PIN) && Light) 
     {
-      //Send outputs
-      if(!LIGHT_STATE) //Inverted Light Pin
-      {
-        bleGamepad.press(BUTTON_2);
+      Light = false;
+      bleGamepad.press(BUTTON_1);
+      Changed = true;
+      #ifdef DEBUG
         Serial.println("Light On");
-      }
-      else
-        bleGamepad.release(BUTTON_2);
-
-      if(!TRIGGER_STATE)    //Normal operation //invert for latency test
-      {
-        bleGamepad.press(BUTTON_1);
-        Serial.println("Trigger On");
-      }
-      else
-        bleGamepad.release(BUTTON_1);
-
-      bleGamepad.sendReport();
+      #endif
     }
-  }
-  else
-  {
-    
-    if(connected)
+
+    if(digitalRead(TRIGGER_PIN) && !Trigger)
     {
-      Serial.println("Disconnected");
-      connected = false;
+      Trigger = true;
+      bleGamepad.press(BUTTON_2);
+      Changed = true;
+      #ifdef DEBUG
+        Serial.println("Trigger On");
+      #endif
     }
-    
+    else if(!digitalRead(TRIGGER_PIN) && Trigger)
+    {
+      Trigger = false;
+      bleGamepad.release(BUTTON_2);
+      Changed = true;
+      #ifdef DEBUG
+        Serial.println("Trigger Off");
+      #endif
+    }
+
+    if (Changed)
+    {
+      bleGamepad.sendReport();
+      #ifdef DEBUG
+        Serial.print(".");
+      #endif
+    }
   }
 }
