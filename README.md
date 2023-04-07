@@ -1,5 +1,10 @@
 -----------
--- PARTS --
+Description 
+-----------
+Custom kit initially designed for Wangaratta District Specialist School. A device to use a NES Zapper with any Bluetooth receiver, including BlueRetro, To be used with with custom patched ROMs from @neslcdmod.
+
+-----------
+Parts 
 -----------
 1x NES controller extension cable  
 1x ESP32 DevKitC  
@@ -8,7 +13,7 @@ Also required: 1x NES Zapper (Tested with a Tomee Zapp Gun that works better wit
 
 
 ------------------
--- INSTRUCTIONS --
+Instructions 
 ------------------
 1. Cut the NES controller extension cable in half and keep the socket end.
 
@@ -24,7 +29,7 @@ NOTE: This is usually required because most NES controller extension cables leav
 TODO: Additional setup and use instructions
 
 -------------
--- PIN MAP --
+Pin map
 -------------
 
 
@@ -45,7 +50,7 @@ NC -> |O O| <- Pin 19 / Trigger     (Black)
 ```
 
 ------------------------
--- CREDITS / LIBARIES --
+CREDITS / LIBARIES 
 ------------------------
 Only possible due to ROM patches from NESLCDMOD  
 Utilises: https://github.com/lemmingDev/ESP32-BLE-Gamepad
