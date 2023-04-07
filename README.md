@@ -1,7 +1,7 @@
 -----------
 Description 
 -----------
-Custom kit initially designed for Wangaratta District Specialist School. A device to use a NES Zapper with any Bluetooth receiver, including BlueRetro, To be used with with custom patched ROMs from @neslcdmod.
+Custom kit initially designed for Wangaratta District Specialist School. A device to use a NES Zapper with any Bluetooth receiver, including BlueRetro, To be used with with custom patched ROMs from @neslcdmod. PowerPad and standard gamepad support coming. SNES accessory support is also possible with a SNES controller female socket, but not yet tested.
 
 -----------
 Parts 
@@ -17,10 +17,15 @@ Instructions
 ------------------
 1. Cut the NES controller extension cable in half and keep the socket end.
 
-2. Strip 4cm of outer insulation from the NES controller extension cable.
+1. Strip 4cm of outer insulation from the NES controller extension cable.
 
-3. Dissassemble the socket of the NES controller extension cable and carefully remove the pins for the CLOCK and LATCH pins, or any pins marked NC on the diagram below, and move them to the position of the Light and Trigger pins of the diagram below.
-NOTE: This is usually required because most NES controller extension cables leave the pins for Light and Trigger disconnected, if your cable has all pins wired, skip this step.
+1. Wiring
+     - If using the device for Zappers only, the easiest route is to dissassemble the socket of the NES controller extension cable and carefully remove the pins for the  CLOCK and LATCH (D0) pins and move them to the position of the Light and Trigger pins of the diagram below.
+NOTE: This is usually required because most NES controller extension cables leave the pins for Light and Trigger disconnected, if your cable has all pins wired, skip   this step.
+
+     - If using the device for Zappers and PowerPads, then wiring Clock and LATCH (D0) is also required as well as D3 and D4. This may require a different cable to wire   to the socket, if the original one does not have enough wires for all connections. 
+
+     - If using the device for Zappers, PowerPads and normal controllers, then wiring Clock and LATCH (D0), and D1 is also required as well as D3 and D4. This may     require a different cable to wire to the socket, if the original one does not have enough wires for all connections.  
 
 4. Strip the wires for the pins GND, 5V, Light and Trigger shown on the diagram below, use a multimeter to test which wire colour responds to which pin for your cable.
 
@@ -42,17 +47,16 @@ GND     |   GND      |  (White)
 
 ```
       .--               
-GND --|O \                          (White)
-NC <- |O O\ -- +5V                  (Red)
-NC <- |O O| <- Pin 21 / Light       (Yellow)   
-NC -> |O O| <- Pin 19 / Trigger     (Black)      
-       ---
+GND --|O \                               (White)
+CL <- |O O\ -- +5V                       (Red)
+D0 <- |O O| <- D3 - Pin 21 / Light       (Yellow)   
+D1 -> |O O| <- D4 - Pin 19 / Trigger     (Black)      
+      '---'       
 ```
 
 ------------------------
 CREDITS / LIBARIES 
 ------------------------
 Only possible due to ROM patches from NESLCDMOD  
-Utilises: https://github.com/lemmingDev/ESP32-BLE-Gamepad
-Which relies on -> https://github.com/h2zero/NimBLE-Arduino
-      '---'       
+Utilises: https://github.com/lemmingDev/ESP32-BLE-Gamepad  
+Which relies on -> https://github.com/h2zero/NimBLE-Arduino  
