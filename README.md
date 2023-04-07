@@ -1,13 +1,10 @@
-[WIP]
-Uses library https://github.com/lemmingDev/ESP32-BLE-Gamepad from https://github.com/lemmingDev/
-
 -----------
 -- PARTS --
 -----------
-1x NES controller extension cable 
-1x ESP32 DevKitC
-
-Also required: 1x NES Zapper (Tested with a Tomee Zapp Gun that works better with non-CRT displays)
+1x NES controller extension cable  
+1x ESP32 DevKitC  
+  
+Also required: 1x NES Zapper (Tested with a Tomee Zapp Gun that works better with non-CRT displays)  
 
 
 ------------------
@@ -26,20 +23,31 @@ NOTE: This is usually required because most NES controller extension cables leav
 
 TODO: Additional setup and use instructions
 
------------
---PIN MAP--
------------
+-------------
+-- PIN MAP --
+-------------
 
-ESP32   /   Zapper     (Colour)     
-------------------------------------
-21      /   Light       (Yellow)    
-19      /   Trigger     (Black)     
-5V      /   5V          (Red)          
-GND     /   GND         (White)        
 
+ESP32   |   Zapper   |  (Colour)     
+--------|------------|--------------
+21      |   Light    |   (Yellow)    
+19      |   Trigger  |   (Black)     
+5V      |   5V       |  (Red)          
+GND     |   GND      |  (White)        
+
+```
       .--               
 GND --|O \                          (White)
 NC <- |O O\ -- +5V                  (Red)
 NC <- |O O| <- Pin 21 / Light       (Yellow)   
-NC -> |O O| <- Pin 19 / Trigger     (Black)        
+NC -> |O O| <- Pin 19 / Trigger     (Black)      
+       ---
+```
+
+------------------------
+-- CREDITS / LIBARIES --
+------------------------
+Only possible due to ROM patches from NESLCDMOD  
+Utilises: https://github.com/lemmingDev/ESP32-BLE-Gamepad
+Which relies on -> https://github.com/h2zero/NimBLE-Arduino
       '---'       
