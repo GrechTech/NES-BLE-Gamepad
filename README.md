@@ -40,8 +40,8 @@ Pin map
 
 ESP32   |   Zapper   |  (Colour)     
 --------|------------|--------------
-21      |   Light    |   (Yellow)    
-19      |   Trigger  |   (Black)     
+21      |   Light    |  (Yellow)    
+19      |   Trigger  |  (Black)     
 5V      |   5V       |  (Red)          
 GND     |   GND      |  (White)        
 

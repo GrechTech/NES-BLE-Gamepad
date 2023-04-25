@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <BleGamepad.h> // https://github.com/lemmingDev/ESP32-BLE-Gamepad
 
-//#define DEBUG
+const bool Debug = false;
 
 static const int LIGHT_PIN = 21;	// ESP32 IO pins
 static const int TRIGGER_PIN = 19; // any input pins with pullups will work
@@ -15,11 +15,12 @@ BleGamepadConfiguration bleGamepadConfig;     // Create a BleGamepadConfiguratio
 
 void setup()
 {
-#ifdef DEBUG
-  Serial.begin(115200);
-  Serial.print("Start");
-#endif
-
+  if (Debug)
+  {
+    Serial.begin(115200);
+    Serial.print("Start");
+  }
+  
   pinMode(LIGHT_PIN, INPUT_PULLUP);
   pinMode(TRIGGER_PIN, INPUT_PULLUP); // Tomee Zapp has a simple switch NC to GND. 
   // When trigger pulled, switch disconnected from GND allowing it to be pulled up
@@ -54,18 +55,20 @@ void loop()
       Light = true;
       bleGamepad.release(BUTTON_1); //Inverted Light Pin
       Changed = true;
-      #ifdef DEBUG
+      if (Debug)
+      {
         Serial.println("Light Off");
-      #endif
+      }
     }
     else if(!digitalRead(LIGHT_PIN) && Light) 
     {
       Light = false;
       bleGamepad.press(BUTTON_1);
       Changed = true;
-      #ifdef DEBUG
+      if (Debug)
+      {
         Serial.println("Light On");
-      #endif
+      }
     }
 
     if(digitalRead(TRIGGER_PIN) && !Trigger)
@@ -73,26 +76,29 @@ void loop()
       Trigger = true;
       bleGamepad.press(BUTTON_2);
       Changed = true;
-      #ifdef DEBUG
+      if (Debug)
+      {
         Serial.println("Trigger On");
-      #endif
+      }
     }
     else if(!digitalRead(TRIGGER_PIN) && Trigger)
     {
       Trigger = false;
       bleGamepad.release(BUTTON_2);
       Changed = true;
-      #ifdef DEBUG
+      if (Debug)
+      {
         Serial.println("Trigger Off");
-      #endif
+      }
     }
 
     if (Changed)
     {
       bleGamepad.sendReport();
-      #ifdef DEBUG
+      if (Debug)
+      {
         Serial.print(".");
-      #endif
+      }
     }
   }
 }
