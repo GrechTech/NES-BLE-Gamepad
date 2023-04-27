@@ -367,10 +367,10 @@ void loop()
       case none:
         break;
       case gamepad:
-        readLatch();
+        readGamepad();
         break;
       case powerpad:
-        readLatch(/* powerpad = */true);
+        readPowerpad();
         break;
       case zapper:
         readZapper();
