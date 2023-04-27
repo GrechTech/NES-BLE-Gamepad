@@ -1,9 +1,4 @@
 -----------
-Description 
------------
-Custom kit initially designed for Wangaratta District Specialist School. A device to use a NES Zapper with any Bluetooth receiver, including BlueRetro, To be used with with custom patched ROMs from @neslcdmod. PowerPad and standard gamepad support coming. SNES accessory support is also possible with a SNES controller female socket, but not yet tested.
-
------------
 Parts 
 -----------
 1x NES controller extension cable  
