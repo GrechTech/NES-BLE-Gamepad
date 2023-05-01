@@ -1,19 +1,6 @@
-#include <Arduino.h>
 #include <BleGamepad.h> // https://github.com/lemmingDev/ESP32-BLE-Gamepad
 
-//-- CONFIG --//
-const bool DEBUG = false; // Enable for serial monitor priority debug outputs
-const bool DEBUG_ADV = false; // Enable for serial monitor advanced debug outputs
-
 // ENUMERATIONS
-enum padTypes // Defines the supported types of NES controller input
-{   
-  noPad = 0,      //  No known pad detected successfully (Includes no connection)
-  gamePad = 1,    //  Normal NES controller detected
-  powerPad = 2,   //  NES Power Pad detected
-  zapperPad = 3   //  NES Zapper detected (Only tested with Tomee Zapp - 1st May 2023)
-};
-
 enum pins // ESP32 Pin Labels
 {   
   GAMEPAD_PIN = 18,     //  PowerPad or Normal Pad only
@@ -26,6 +13,20 @@ enum pins // ESP32 Pin Labels
   CLOCK_PIN = 22,       //  PowerPad or Normal Pad only
   LATCH_PIN = 23,       //  PowerPad or Normal Pad only
 };
+
+enum padTypes // Defines the supported types of NES controller input
+{   
+  noPad = 0,      //  No known pad detected successfully (Includes no connection)
+  gamePad = 1,    //  Normal NES controller detected
+  powerPad = 2,   //  NES Power Pad detected
+  zapperPad = 3   //  NES Zapper detected (Only tested with Tomee Zapp - 1st May 2023)
+};
+
+//---------- CONFIG ----------//
+const padTypes forceMode = noPad; // Force a given pad mode, Auto detect if noPad selected
+const bool DEBUG = false; // Enable for serial monitor priority debug outputs
+const bool DEBUG_ADV = false; // Enable for serial monitor advanced debug outputs
+//---------- CONFIG ----------//
 
 // REGISTERS
 padTypes currentType = noPad; // Stores the current pad type
@@ -126,6 +127,7 @@ inline void setupZapper()
     Serial.println("#### Done Setup Zapper Pad");
   }
 }
+
 
 // READ FUNCTIONS
 inline uint16_t readShiftReg(bool powerpad = false) 
@@ -519,7 +521,7 @@ inline padTypes detectType()
 
 void setup()
 {
-  padTypes type = noPad; // Represents the type of NES accessory
+  padTypes type = forceMode; // Represents the type of NES accessory
 
   if (DEBUG)
   {
@@ -527,10 +529,13 @@ void setup()
     Serial.println("### Setup Start");
   }
 
-  while (type == noPad);
+  if(forceMode == noPad)
   {
-    type = detectType();
-  } 
+    while (type == noPad);
+    {
+      type = detectType();
+    } 
+  }
 
   switch(type)
   {
