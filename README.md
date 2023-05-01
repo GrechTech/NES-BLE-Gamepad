@@ -1,3 +1,5 @@
+NOTE: Currently only the Zapper-Only branch is stable and documented. Other branches are WIP.
+
 ------------------------
 Instructions
 ------------------------
