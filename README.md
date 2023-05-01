@@ -1,4 +1,4 @@
-NOTE: Currently only the Zapper-Only branch is stable and documented. Other branches are WIP.
+NOTE: Currently only the Zapper-Only branch is stable and documented. Main branch is WIP.
 
 ------------------------
 Instructions
@@ -14,6 +14,6 @@ Custom kit initially designed for Wangaratta District Specialist School. A devic
 ------------------------
 CREDITS / LIBARIES 
 ------------------------
-Only possible due to ROM patches from NESLCDMOD  
+Zapper Mode only possible with ROM patches from NESLCDMOD  
 Utilises: https://github.com/lemmingDev/ESP32-BLE-Gamepad  
 Which relies on -> https://github.com/h2zero/NimBLE-Arduino  
