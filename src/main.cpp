@@ -1,48 +1,49 @@
 #include <Arduino.h>
 #include <BleGamepad.h> // https://github.com/lemmingDev/ESP32-BLE-Gamepad
 
-// PINS
-const int CLOCK_PIN = 22;    //  PowerPad or Normal Pad only
-const int LATCH_PIN = 23;    //  PowerPad or Normal Pad only
-const int GAMEPAD_PIN = 18;       //  PowerPad or Normal Pad only
+//-- CONFIG --//
+const bool DEBUG = false; // Enable for serial monitor priority debug outputs
+const bool DEBUG_ADV = false; // Enable for serial monitor advanced debug outputs
 
-const int LIGHT_PIN = 21;    //  Zapper only (= PP_OUT1_PIN)
-const int TRIGGER_PIN = 19;  //  Zapper only (= PP_OUT2_PIN)
-const int POWERPAD1_PIN = 21;  //  Power Pad only (= LIGHT_PIN)
-const int POWERPAD2_PIN = 19;  //  Power Pad only (= TRIGGER_PIN)
-
-// CONSTANTS
-const bool DEBUG = false;
-
-enum padTypes 
+// ENUMERATIONS
+enum padTypes // Defines the supported types of NES controller input
 {   
-  none = 0, 
-  gamepad = 1, 
-  powerpad = 2,
-  zapper = 3
+  noPad = 0,      //  No known pad detected successfully (Includes no connection)
+  gamePad = 1,    //  Normal NES controller detected
+  powerPad = 2,   //  NES Power Pad detected
+  zapperPad = 3   //  NES Zapper detected (Only tested with Tomee Zapp - 1st May 2023)
+};
+
+enum pins // ESP32 Pin Labels
+{   
+  GAMEPAD_PIN = 18,     //  PowerPad or Normal Pad only
+  POWERPAD2_PIN = 19,   //  Power Pad only (= TRIGGER_PIN)
+  POWERPAD1_PIN = 21,   //  Power Pad only (= LIGHT_PIN)
+
+  TRIGGER_PIN = 19,     //  Zapper only (= PP_OUT2_PIN)
+  LIGHT_PIN = 21,       //  Zapper only (= PP_OUT1_PIN)
+
+  CLOCK_PIN = 22,       //  PowerPad or Normal Pad only
+  LATCH_PIN = 23,       //  PowerPad or Normal Pad only
 };
 
 // REGISTERS
-uint8_t padType = 0;
+padTypes currentType = noPad; // Stores the current pad type
 
-bool lightData = true;
-bool triggerData = false;
-
-uint16_t prevPadData = 0;
-
-bool Changed = false;
+bool lightData = true;        // Result of the Zapper light sensor, to check for changes
+bool triggerData = false;     // Result of the Zapper trigger, to check for changes
+uint16_t padData = 0;         // Result of game/power pad state, to check for changes
 
 // DYNAMIC
 BleGamepad bleGamepad("NES Controller", "GrechTech", 100); // Initialise Bluetooth gamepad
-BleGamepadConfiguration bleGamepadConfig;     // Create a BleGamepadConfiguration object to store all of the options
-
+BleGamepadConfiguration bleGamepadConfig;     // Sstore all of the Bluetooth options
 
 // SETUP BASE FUNCTIONS
-inline void setupBluetooth()
+inline void setupBluetooth() // Setup the Bluetooth gamepad service
 {
-  bleGamepadConfig.setHatSwitchCount(1);
-  bleGamepadConfig.setIncludeZAxis(false); // Simplify the HID report 
-  bleGamepadConfig.setIncludeRxAxis(false);
+  bleGamepadConfig.setHatSwitchCount(1);    // Set a single D-Pad
+  bleGamepadConfig.setIncludeZAxis(false);  // Simplify the HID report 
+  bleGamepadConfig.setIncludeRxAxis(false); // By removing unused axis
   bleGamepadConfig.setIncludeRyAxis(false);
   bleGamepadConfig.setIncludeRzAxis(false);
   bleGamepadConfig.setIncludeSlider1(false);
@@ -51,9 +52,14 @@ inline void setupBluetooth()
   bleGamepadConfig.setAutoReport(false); // Manually handle reports, for performance
 
   bleGamepad.begin(&bleGamepadConfig);
+
+  if (DEBUG)
+  {
+    Serial.println("##### Done Setup BLE");
+  }
 }
 
-inline void setupLatch()
+inline void setupShiftReg() // Setup pins to read 4021 shift register(s)
 {
   pinMode(LATCH_PIN,OUTPUT);
   pinMode(CLOCK_PIN,OUTPUT);
@@ -64,6 +70,11 @@ inline void setupLatch()
   
   digitalWrite(LATCH_PIN,HIGH);
   digitalWrite(CLOCK_PIN,HIGH);
+
+  if (DEBUG)
+  {
+    Serial.println("##### Done Setup Latch");
+  }
 }
 
 
@@ -71,17 +82,31 @@ inline void setupLatch()
 inline void setupGamepad()
 {
   bleGamepad.deviceName = "NES Game Pad";
-  setupLatch();
+  setupShiftReg();
   bleGamepadConfig.setButtonCount(2); 
   setupBluetooth();
+
+  currentType = gamePad;
+
+  if (DEBUG)
+  {
+    Serial.println("#### Done Setup Game Pad");
+  }
 }
 
 inline void setupPowerpad()
 {
   bleGamepad.deviceName = "NES Power Pad";
-  setupLatch();
+  setupShiftReg();
   bleGamepadConfig.setButtonCount(12); 
   setupBluetooth();
+
+  currentType = powerPad;
+
+  if (DEBUG)
+  {
+    Serial.println("#### Done Setup Power Pad");
+  }
 }
 
 inline void setupZapper()
@@ -94,13 +119,19 @@ inline void setupZapper()
   bleGamepadConfig.setButtonCount(2); 
   setupBluetooth();
 
-  bleGamepad.begin(&bleGamepadConfig);
+  currentType = zapperPad;
+
+  if (DEBUG)
+  {
+    Serial.println("#### Done Setup Zapper Pad");
+  }
 }
 
 // READ FUNCTIONS
-inline uint16_t readLatch(bool powerpad = false) 
+inline uint16_t readShiftReg(bool powerpad = false) 
 {
-  uint8_t gamepadData = 0;
+  // Setup local registers for each input
+  uint8_t gamepadData = 0; 
   uint8_t powerpadData1 = 0;
   uint8_t powerpadData2 = 0;
 
@@ -111,10 +142,12 @@ inline uint16_t readLatch(bool powerpad = false)
   delayMicroseconds(2);
   digitalWrite(LATCH_PIN, LOW);
   
+  // Read 1st bits of each input
   gamepadData = digitalRead(GAMEPAD_PIN);
   powerpadData1 = digitalRead(POWERPAD1_PIN);
   powerpadData2 = digitalRead(POWERPAD2_PIN);
-    
+  
+  // Read 2nd to 8th bits of each input
   for (int c = 1; c < 8; c++) 
   {
     digitalWrite(CLOCK_PIN, HIGH);
@@ -137,224 +170,370 @@ inline uint16_t readLatch(bool powerpad = false)
     delayMicroseconds(4);
     digitalWrite(CLOCK_PIN, LOW);
 
-    if (DEBUG)
+    if (DEBUG_ADV)
     {
       Serial.print(c);
     }
   }
 
-  if (DEBUG)
+  if (DEBUG_ADV)
   {
     Serial.println();
+    Serial.print("Game Pad Data: ");
     Serial.println(gamepadData, BIN);
-    Serial.println(powerpadData1, BIN);
+    Serial.print("Power Pad Data: ");
+    Serial.print(powerpadData1, BIN);
+    Serial.print(" ");
     Serial.println(powerpadData2, BIN);
   }
 
   if(powerpad)
   {
-    uint16_t powerpadData = 256U * powerpadData2 + powerpadData1;
+    // Combine two (8-bit unsigned) bytes into one 16-bit unsigned integer
+    uint16_t powerpadData = (256U * powerpadData2) + powerpadData1;
+    if (DEBUG_ADV)
+    {
+      Serial.print("PP: ");
+      Serial.println(powerpadData, BIN);
+    }
     return powerpadData;
   }
   else
   {
+    if (DEBUG_ADV)
+    {
+      Serial.print("GP: ");
+      Serial.println((uint16_t)gamepadData, BIN);
+    }
     return (uint16_t)gamepadData;
   }
 }
 
 inline void readGamepad()
 {
-  uint8_t gamepadData = (uint8_t)readLatch();
+  uint8_t gamepadData = (uint8_t)readShiftReg(); // Get state
 
-  if((gamepadData & 0) == 0) 
-    bleGamepad.press(0);
-  else
-    bleGamepad.release(0);
-
-  if((gamepadData & 1) == 0) 
-    bleGamepad.press(1);
-  else
-    bleGamepad.release(1);
-
-  if((gamepadData & 2) == 0) 
-    bleGamepad.pressStart();
-  else
-    bleGamepad.releaseStart();
-
-  if((gamepadData & 3) == 0) 
-    bleGamepad.pressSelect();
-  else
-    bleGamepad.releaseSelect();
-
-  if( ((gamepadData & 4) == 0) && ((gamepadData & 5) == 1) && ((gamepadData & 6) == 1) && ((gamepadData & 7) == 1)) 
-    bleGamepad.setHat1(1);
-  else if( ((gamepadData & 4) == 0) && ((gamepadData & 5) == 0) && ((gamepadData & 6) == 1) && ((gamepadData & 7) == 1)) 
-    bleGamepad.setHat1(2);
-  else if( ((gamepadData & 4) == 1) && ((gamepadData & 5) == 0) && ((gamepadData & 6) == 1) && ((gamepadData & 7) == 1)) 
-    bleGamepad.setHat1(3);
-  else if( ((gamepadData & 4) == 1) && ((gamepadData & 5) == 0) && ((gamepadData & 6) == 0) && ((gamepadData & 7) == 1)) 
-    bleGamepad.setHat1(4);
-  else if( ((gamepadData & 4) == 1) && ((gamepadData & 5) == 1) && ((gamepadData & 6) == 0) && ((gamepadData & 7) == 1)) 
-    bleGamepad.setHat1(5);
-  else if( ((gamepadData & 4) == 1) && ((gamepadData & 5) == 1) && ((gamepadData & 6) == 0) && ((gamepadData & 7) == 0)) 
-    bleGamepad.setHat1(6);
-  else if( ((gamepadData & 4) == 1) && ((gamepadData & 5) == 1) && ((gamepadData & 6) == 1) && ((gamepadData & 7) == 0)) 
-    bleGamepad.setHat1(7);
-  else if( ((gamepadData & 4) == 0) && ((gamepadData & 5) == 1) && ((gamepadData & 6) == 1) && ((gamepadData & 7) == 0)) 
-    bleGamepad.setHat1(8);
-  else
-    bleGamepad.setHat1(0);
-
-  if((uint16_t)gamepadData != prevPadData)
+  if((uint16_t)gamepadData != padData) // If state changed
   {
+    if((gamepadData & 0) == 0)  // Inverted
+    {
+      bleGamepad.press(0);
+      if (DEBUG)
+        Serial.println("# BTN: A Pressed");
+    }
+    else
+    {
+      bleGamepad.release(0);
+      if (DEBUG)
+        Serial.println("# BTN: A Released");
+    }
+
+    if((gamepadData & 1) == 0) 
+    {
+      bleGamepad.press(1);
+      if (DEBUG)
+        Serial.println("# BTN: B Pressed");
+    }  
+    else
+    {
+      bleGamepad.release(1);
+      if (DEBUG)
+        Serial.println("# BTN: B Released");
+    }
+
+    if((gamepadData & 2) == 0) 
+    {
+      bleGamepad.pressStart();
+      if (DEBUG)
+        Serial.println("# BTN: Start Pressed");
+    }
+    else
+    {
+      bleGamepad.releaseStart();
+      if (DEBUG)
+        Serial.println("# BTN: Start Released");
+    }
+
+    if((gamepadData & 3) == 0) 
+    {
+      bleGamepad.pressSelect();
+      if (DEBUG)
+        Serial.println("# BTN: Select Pressed");
+    }
+    else
+    {
+      bleGamepad.releaseSelect();
+      if (DEBUG)
+        Serial.println("# BTN: Select Released");
+    }
+
+    if (DEBUG)
+      Serial.print("# DPAD: ");
+
+    if( ((gamepadData & 4) == 0) && ((gamepadData & 5) == 1)
+     && ((gamepadData & 6) == 1) && ((gamepadData & 7) == 1)) 
+    {
+      bleGamepad.setHat1(1); // UP          (N)
+      if (DEBUG)
+        Serial.println("1 U");
+    }
+    else if( ((gamepadData & 4) == 0) && ((gamepadData & 5) == 0)
+          && ((gamepadData & 6) == 1) && ((gamepadData & 7) == 1)) 
+    {
+      bleGamepad.setHat1(2); // UP RIGHT    (NE)
+      if (DEBUG)
+        Serial.println("2 UR");
+    }
+    else if( ((gamepadData & 4) == 1) && ((gamepadData & 5) == 0)
+          && ((gamepadData & 6) == 1) && ((gamepadData & 7) == 1)) 
+    {
+      bleGamepad.setHat1(3); // RIGHT       (E)
+      if (DEBUG)
+        Serial.println("3 R");
+    }
+    else if( ((gamepadData & 4) == 1) && ((gamepadData & 5) == 0)
+          && ((gamepadData & 6) == 0) && ((gamepadData & 7) == 1)) 
+    {
+      bleGamepad.setHat1(4); // DOWN RIGHT  (SE)
+      if (DEBUG)
+        Serial.println("# DPAD: 4 DR");
+    }
+    else if( ((gamepadData & 4) == 1) && ((gamepadData & 5) == 1)
+          && ((gamepadData & 6) == 0) && ((gamepadData & 7) == 1)) 
+    {
+      bleGamepad.setHat1(5); // DOWN        (S)
+      if (DEBUG)
+        Serial.println("# DPAD: 5 D");
+    }
+    else if( ((gamepadData & 4) == 1) && ((gamepadData & 5) == 1)
+          && ((gamepadData & 6) == 0) && ((gamepadData & 7) == 0)) 
+    {
+      bleGamepad.setHat1(6);  // DOWN LEFT  (SW)
+      if (DEBUG)
+        Serial.println("# DPAD: 6 DL");
+    }
+    else if( ((gamepadData & 4) == 1) && ((gamepadData & 5) == 1)
+          && ((gamepadData & 6) == 1) && ((gamepadData & 7) == 0)) 
+    {
+      bleGamepad.setHat1(7); // LEFT        (W)
+      if (DEBUG)
+        Serial.println("# DPAD: 7 L");
+    }
+    else if( ((gamepadData & 4) == 0) && ((gamepadData & 5) == 1)
+          && ((gamepadData & 6) == 1) && ((gamepadData & 7) == 0)) 
+    {
+      bleGamepad.setHat1(8); // UP LEFT     (NW)
+      if (DEBUG)
+        Serial.println("# DPAD: 8 UL");
+    }
+    else
+    {
+      bleGamepad.setHat1(0); // CENTRE      (C)
+      if (DEBUG)
+        Serial.println("0 C");
+    }
+
     bleGamepad.sendReport();
   }
 
-  prevPadData = (uint16_t)gamepadData;
+  padData = (uint16_t)gamepadData;
 }
 
 inline void readPowerpad()
 {
-  uint16_t powerpadData = readLatch();
+  uint16_t powerpadData = readShiftReg(); // Get state
 
-  for(int n = 0; n < 16; n++)
+  if(powerpadData != padData) // If state changed
   {
-    if((powerpadData & 0) == 0) 
-      bleGamepad.press(n);
-    else
-      bleGamepad.release(n);
-  }
+    for(int n = 0; n < 16; n++)
+    {
+      if(powerpadData & n) // Inverted
+      {
+        bleGamepad.release(n);
+        if (DEBUG)
+        {
+          Serial.print("# BTN: ");
+          Serial.print(n);
+          Serial.println(" Released");
+        }
+      }
+      else
+      {
+        bleGamepad.press(n);
+        if (DEBUG)
+        {
+          Serial.print("# BTN: ");
+          Serial.print(n);
+          Serial.println(" Pressed");
+        }
+      }
+    }
 
-  if(powerpadData != prevPadData)
-  {
     bleGamepad.sendReport();
   }
 
-  prevPadData = powerpadData;
+  padData = powerpadData;
 }
 
 inline void readZapper()
 {
-  Changed = false;
+  bool changed = false;
 
-    if(digitalRead(LIGHT_PIN) && !lightData) 
+  if(digitalRead(LIGHT_PIN) && !lightData) 
+  {
+    lightData = true;
+    bleGamepad.release(BUTTON_1); //Inverted Light Pin
+    changed = true;
+    if (DEBUG)
     {
-      lightData = true;
-      bleGamepad.release(BUTTON_1); //Inverted Light Pin
-      Changed = true;
-      if (DEBUG)
-      {
-        Serial.println("Light Off");
-      }
+      Serial.println("Light Off");
     }
-    else if(!digitalRead(LIGHT_PIN) && lightData) 
+  }
+  else if(!digitalRead(LIGHT_PIN) && lightData) 
+  {
+    lightData = false;
+    bleGamepad.press(BUTTON_1);
+    changed = true;
+    if (DEBUG)
     {
-      lightData = false;
-      bleGamepad.press(BUTTON_1);
-      Changed = true;
-      if (DEBUG)
-      {
-        Serial.println("Light On");
-      }
+      Serial.println("Light On");
     }
+  }
 
-    if(digitalRead(TRIGGER_PIN) && !triggerData)
+  if(digitalRead(TRIGGER_PIN) && !triggerData)
+  {
+    triggerData = true;
+    bleGamepad.press(BUTTON_2);
+    changed = true;
+    if (DEBUG)
     {
-      triggerData = true;
-      bleGamepad.press(BUTTON_2);
-      Changed = true;
-      if (DEBUG)
-      {
-        Serial.println("Trigger On");
-      }
+      Serial.println("Trigger On");
     }
-    else if(!digitalRead(TRIGGER_PIN) && triggerData)
+  }
+  else if(!digitalRead(TRIGGER_PIN) && triggerData)
+  {
+    triggerData = false;
+    bleGamepad.release(BUTTON_2);
+    changed = true;
+    if (DEBUG)
     {
-      triggerData = false;
-      bleGamepad.release(BUTTON_2);
-      Changed = true;
-      if (DEBUG)
-      {
-        Serial.println("Trigger Off");
-      }
+      Serial.println("Trigger Off");
     }
+  }
 
-    if (Changed)
+  if (changed)
+  {
+    bleGamepad.sendReport();
+    if (DEBUG)
     {
-      bleGamepad.sendReport();
-      if (DEBUG)
-      {
-        Serial.print(".");
-      }
+      Serial.print(".");
     }
+  }
 }
 
-inline uint8_t detectType()
+inline padTypes detectType()
 {
-  bool gamepad = false;
-  bool powerpad = false;
-  bool zapper = false;
+  bool gamepadIndicator = false;
+  bool powerpadIndicator = false;
+  bool zapperIndicator = false;
 
+  // Game Pad Check
   pinMode(GAMEPAD_PIN, INPUT_PULLDOWN);
   delay(1);
   if(digitalRead(GAMEPAD_PIN))
-    gamepad = true;
+  {
+    gamepadIndicator = true;
+  }
   pinMode(GAMEPAD_PIN, INPUT);
 
+  // Power Pad Check
   pinMode(POWERPAD1_PIN, INPUT_PULLDOWN);
   pinMode(POWERPAD2_PIN, INPUT_PULLDOWN);
   delay(1);
   if(digitalRead(POWERPAD1_PIN) || digitalRead(POWERPAD1_PIN))
-    powerpad = true;
+  {
+    powerpadIndicator = true;
+  }
 
+  // Zapper Check
   pinMode(LIGHT_PIN, INPUT_PULLUP);
   pinMode(TRIGGER_PIN, INPUT_PULLUP);
   delay(1);
   if(digitalRead(LIGHT_PIN) || !digitalRead(TRIGGER_PIN))
-    zapper = true;
+  {
+    zapperIndicator = true;
+  }  
   pinMode(LIGHT_PIN, INPUT);
   pinMode(TRIGGER_PIN, INPUT);  
 
   
-  if(gamepad && !powerpad && !zapper)
-    return 1;
-  else if(!gamepad && powerpad && !zapper)
-    return 2;
-  else if(!gamepad && !powerpad && zapper)
-    return 3;
+  if(gamepadIndicator && !powerpadIndicator && !zapperIndicator)
+  {
+    return gamePad;
+  }  
+  else if(!gamepadIndicator && powerpadIndicator && !zapperIndicator)
+  {
+    return powerPad;
+  }  
+  else if(!gamepadIndicator && !powerpadIndicator && zapperIndicator)
+  {
+    return zapperPad;
+  }  
   else
-    return 0;
+  {
+    return noPad;
+  }  
 }
 
 void setup()
 {
+  padTypes type = noPad; // Represents the type of NES accessory
+
   if (DEBUG)
   {
     Serial.begin(115200);
-    Serial.print("Start");
+    Serial.println("### Setup Start");
   }
-
-  uint8_t type = 0;
 
   while (type == 0);
   {
     type = detectType();
   } 
-  
-  padType = type;
 
-  switch(padType)
+  switch(type)
   {
-    case none:
+    case noPad:
       if (DEBUG)
-        Serial.print("No controller detected");
+      {
+        Serial.println("### No controller detected");
+      }
       break;
-    case gamepad:
+    case gamePad:
+      if (DEBUG)
+      {
+        Serial.println("### Start Setup Game Pad");
+      }  
       setupGamepad();
-    case powerpad:
+      break;
+    case powerPad:
+      if (DEBUG)
+      {
+        Serial.println("### Start Setup Power Pad");
+      }
       setupPowerpad();
-    case zapper:
+      break;
+    case zapperPad:
+      if (DEBUG)
+      {
+        Serial.println("### Start Setup Zapper");
+      }
       setupZapper();
+      break;
+  }
+
+  if (DEBUG)
+  {
+    Serial.println("### Setup Done");
   }
 }
 
@@ -362,17 +541,21 @@ void loop()
 {
   if (bleGamepad.isConnected())
   {
-    switch(padType)
+    switch(currentType)
     {
-      case none:
+      case noPad:
+        if (DEBUG_ADV)
+        {
+          Serial.println("ERROR: NO CONTROLLER");
+        }
         break;
-      case gamepad:
+      case gamePad:
         readGamepad();
         break;
-      case powerpad:
+      case powerPad:
         readPowerpad();
         break;
-      case zapper:
+      case zapperPad:
         readZapper();
         break;
     }
