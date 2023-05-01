@@ -1,7 +1,19 @@
+Check the wiki for more info.  
+
 -----------
 Description 
 -----------
 Custom kit initially designed for Wangaratta District Specialist School. A device to use a NES Zapper with any Bluetooth receiver, including BlueRetro, To be used with with custom patched ROMs from @neslcdmod. PowerPad and standard gamepad support coming. SNES accessory support is also possible with a SNES controller female socket, but not yet tested.
+
+-------------
+User guide
+-------------
+Device will appear with 2 main buttons, corresponding to the Zapper trigger and Light outputs. The Light output is inversed to mimic standard hardware.
+No other outputs are utilised.
+
+Zapper mode can work with any NES emulator, including ones running on other consoles, PCs or phones. When running on consoles, whether an original NES or another system emulating one, BlueRetro receivers can be used.
+For emulators that support Zapper emulation, simply map the Bluetooth buttons to the emulators Light and Trigger inputs, ensuring the emulator is setup to accept inversed Light pin sources.
+For emulators that do not natively support Zapper emulation, patched ROMs from NESLCDMOD can be used that map the games internal Light and Trigger detection functions to the NES gamepad buttons A and B. These ROMs can also help account for any Bluetooth & screen delay.
 
 -----------
 Parts 
@@ -31,7 +43,6 @@ NOTE: This is usually required because most NES controller extension cables leav
 
 5. Crimp the wires with female dupont terminals and connect them to the IO pins shown below, or solder them directly to the pins of the ESP32 DevKit
 
-TODO: Additional setup and use instructions
 
 -------------
 Pin map
