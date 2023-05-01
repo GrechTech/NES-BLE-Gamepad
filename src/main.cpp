@@ -1,4 +1,3 @@
-#include <Arduino.h>
 #include <BleGamepad.h> // https://github.com/lemmingDev/ESP32-BLE-Gamepad
 
 const bool Debug = false;
@@ -8,7 +7,6 @@ static const int TRIGGER_PIN = 19; // any input pins with pullups will work
 
 bool Light = true;
 bool Trigger = false;
-bool Changed = false;
 
 BleGamepad bleGamepad("NES-Zapper", "GrechTech", 100); // Initialise Bluetooth gamepad
 BleGamepadConfiguration bleGamepadConfig;     // Create a BleGamepadConfiguration object to store all of the options
@@ -33,7 +31,7 @@ void setup()
   bleGamepadConfig.setIncludeRzAxis(false);
   bleGamepadConfig.setIncludeSlider1(false);
   bleGamepadConfig.setIncludeSlider2(false);
-  
+
   bleGamepadConfig.setAutoReport(false); // Manually handle reports, for performance
 
   bleGamepad.begin(&bleGamepadConfig);
@@ -48,7 +46,7 @@ void loop()
 {
   if (bleGamepad.isConnected())
   {
-    Changed = false;
+    bool Changed = false;
 
     if(digitalRead(LIGHT_PIN) && !Light) 
     {
@@ -56,9 +54,7 @@ void loop()
       bleGamepad.release(BUTTON_1); //Inverted Light Pin
       Changed = true;
       if (Debug)
-      {
         Serial.println("Light Off");
-      }
     }
     else if(!digitalRead(LIGHT_PIN) && Light) 
     {
@@ -66,9 +62,7 @@ void loop()
       bleGamepad.press(BUTTON_1);
       Changed = true;
       if (Debug)
-      {
         Serial.println("Light On");
-      }
     }
 
     if(digitalRead(TRIGGER_PIN) && !Trigger)
@@ -77,9 +71,7 @@ void loop()
       bleGamepad.press(BUTTON_2);
       Changed = true;
       if (Debug)
-      {
         Serial.println("Trigger On");
-      }
     }
     else if(!digitalRead(TRIGGER_PIN) && Trigger)
     {
@@ -87,18 +79,14 @@ void loop()
       bleGamepad.release(BUTTON_2);
       Changed = true;
       if (Debug)
-      {
         Serial.println("Trigger Off");
-      }
     }
 
     if (Changed)
     {
       bleGamepad.sendReport();
       if (Debug)
-      {
         Serial.print(".");
-      }
     }
   }
 }
