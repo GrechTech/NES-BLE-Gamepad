@@ -1,5 +1,3 @@
-NOTE: Currently only the Zapper-Only branch is stable and documented. Main branch is WIP.
-
 ------------------------
 Instructions
 ------------------------
@@ -15,6 +13,6 @@ Tested with ~8ms latency, more info here: https://github.com/GrechTech/NES-BLE-G
 ------------------------
 CREDITS / LIBARIES 
 ------------------------
-Zapper Mode only possible with ROM patches from NESLCDMOD  
+Zapper Mode possible thanks to ROM patches from NESLCDMOD  
 Utilises: https://github.com/lemmingDev/ESP32-BLE-Gamepad  
 Which relies on -> https://github.com/h2zero/NimBLE-Arduino  
