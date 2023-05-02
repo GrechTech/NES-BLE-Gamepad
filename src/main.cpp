@@ -24,7 +24,7 @@ enum padTypes // Defines the supported types of NES controller input
 
 //---------- CONFIG ----------//
 const padTypes forceMode = noPad; // Force a given pad mode, Auto detect if noPad selected
-const bool DEBUG = false; // Enable for serial monitor priority debug outputs
+const bool DEBUG = true; // Enable for serial monitor priority debug outputs
 const bool DEBUG_ADV = false; // Enable for serial monitor advanced debug outputs
 //---------- CONFIG ----------//
 
@@ -192,7 +192,7 @@ inline uint16_t readShiftReg(bool powerpad = false)
   if(powerpad)
   {
     // Combine two (8-bit unsigned) bytes into one 16-bit unsigned integer
-    uint16_t powerpadData = (256U * powerpadData2) + powerpadData1;
+    uint16_t powerpadData = (256U * (uint16_t)powerpadData1) + (uint16_t)powerpadData2;
     if (DEBUG_ADV)
     {
       Serial.print("PP: ");
@@ -339,7 +339,6 @@ inline void readGamepad()
           Serial.println("0 C");
       }
     }
-    
 
     bleGamepad.sendReport();
   }
@@ -349,7 +348,7 @@ inline void readGamepad()
 
 inline void readPowerpad()
 {
-  uint16_t powerpadData = readShiftReg(); // Get state
+  uint16_t powerpadData = readShiftReg(true); // Get state
 
   if(powerpadData != prevPadData) // If state changed
   {
@@ -531,10 +530,24 @@ void setup()
 
   if(forceMode == noPad)
   {
-    while (type == noPad);
+    if (DEBUG)
+    {
+      Serial.print("### Auto Detect Start");
+    }
+
+    while (type == noPad)
     {
       type = detectType();
+
+      if (DEBUG)
+        Serial.print('.');
     } 
+
+    if (DEBUG)
+    {
+      Serial.println();
+      Serial.println("### Auto Detect Complete");
+    }
   }
 
   switch(type)
