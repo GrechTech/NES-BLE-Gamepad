@@ -24,7 +24,7 @@ enum padTypes // Defines the supported types of NES controller input
 
 //---------- CONFIG ----------//
 const padTypes forceMode = noPad; // Force a given pad mode, Auto detect if noPad selected
-const bool DEBUG = false; // Enable for serial monitor priority debug outputs
+const bool DEBUG = true; // Enable for serial monitor priority debug outputs
 const bool DEBUG_ADV = false; // Enable for serial monitor advanced debug outputs
 //---------- CONFIG ----------//
 
@@ -34,6 +34,11 @@ padTypes currentType = noPad; // Stores the current pad type
 uint16_t prevPadData = 65535;     // Previous state of game/power pad state
 bool prevTriggData = false;     // Previous state of Zapper trigger
 bool prevLightData = true;      // Previous state of Zapper light sensor
+uint16_t triggerPeriod = 200;
+unsigned long triggerTime = 0;
+uint16_t lightPeriod = 1000;
+unsigned long lightTime = 0;
+
 
 // DYNAMIC
 BleGamepad bleGamepad("NES Controller", "GrechTech", 100); // Initialise Bluetooth gamepad
@@ -396,19 +401,20 @@ inline void readZapper()
     prevLightData = true;
     bleGamepad.release(BUTTON_1); //Inverted Light Pin
     changed = true;
+    lightTime = millis();
     if (DEBUG)
     {
-      Serial.println("Light Off");
+      Serial.println("Light On (Inverted)");
     }
   }
-  else if(!digitalRead(LIGHT_PIN) && prevLightData) 
+  else if(!digitalRead(LIGHT_PIN) && prevLightData && (millis() - lightTime > lightPeriod)) 
   {
     prevLightData = false;
     bleGamepad.press(BUTTON_1);
     changed = true;
     if (DEBUG)
     {
-      Serial.println("Light On");
+      Serial.println("Light Off (Inverted)");
     }
   }
 
@@ -417,12 +423,13 @@ inline void readZapper()
     prevTriggData = true;
     bleGamepad.press(BUTTON_2);
     changed = true;
+    triggerTime = millis();
     if (DEBUG)
     {
       Serial.println("Trigger On");
     }
   }
-  else if(!digitalRead(TRIGG_PIN) && prevTriggData)
+  else if(!digitalRead(TRIGG_PIN) && prevTriggData && (millis() - triggerTime > triggerPeriod))
   {
     prevTriggData = false;
     bleGamepad.release(BUTTON_2);
