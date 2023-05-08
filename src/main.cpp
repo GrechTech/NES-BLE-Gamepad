@@ -24,7 +24,7 @@ enum padTypes // Defines the supported types of NES controller input
 
 //---------- CONFIG ----------//
 const padTypes forceMode = noPad; // Force a given pad mode, Auto detect if noPad selected
-const bool DEBUG = true; // Enable for serial monitor priority debug outputs
+const bool DEBUG = false; // Enable for serial monitor priority debug outputs
 const bool DEBUG_ADV = false; // Enable for serial monitor advanced debug outputs
 //---------- CONFIG ----------//
 
@@ -36,7 +36,7 @@ bool prevTriggData = false;     // Previous state of Zapper trigger
 bool prevLightData = true;      // Previous state of Zapper light sensor
 uint16_t triggerPeriod = 200;
 unsigned long triggerTime = 0;
-uint16_t lightPeriod = 1000;
+uint16_t lightPeriod = 500;
 unsigned long lightTime = 0;
 
 
