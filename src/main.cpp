@@ -26,19 +26,19 @@ enum padTypes // Defines the supported types of NES controller input
 const padTypes forceMode = noPad; // Force a given pad mode, Auto detect if noPad selected
 const bool DEBUG = false; // Enable for serial monitor priority debug outputs
 const bool DEBUG_ADV = false; // Enable for serial monitor advanced debug outputs
+const uint16_t triggerPeriod = 100;   // Trigger debounce & reset time (ms)
+const uint16_t lightPeriod = 20;      // Light sensor input debounce time (ms)
 //---------- CONFIG ----------//
 
 // REGISTERS
 padTypes currentType = noPad; // Stores the current pad type
 
-uint16_t prevPadData = 65535;     // Previous state of game/power pad state
+uint16_t prevPadData = 65535;   // Previous state of game/power pad state
 bool prevTriggData = false;     // Previous state of Zapper trigger
+bool prevTriggResetData = false;// Previous state of Zapper trigger reset
 bool prevLightData = true;      // Previous state of Zapper light sensor
-uint16_t triggerPeriod = 100;
-unsigned long triggerTime = 0;
-uint16_t lightPeriod = 20;
-unsigned long lightTime = 0;
-
+unsigned long triggerTime = 0;  // Time of last trigger pull
+unsigned long lightTime = 0;    // Time of last light sense
 
 // DYNAMIC
 BleGamepad bleGamepad("NES Controller", "GrechTech", 100); // Initialise Bluetooth gamepad
@@ -463,6 +463,7 @@ inline void readZapper()
   if(digitalRead(TRIGG_PIN) && !prevTriggData)
   {
     prevTriggData = true;
+    prevTriggResetData = false;
     bleGamepad.press(BUTTON_2);
     changed = true;
     triggerTime = millis();
@@ -471,9 +472,21 @@ inline void readZapper()
       Serial.println("Trigger On");
     }
   }
+  else if(digitalRead(TRIGG_PIN) && prevTriggData && !prevTriggResetData && (millis() - triggerTime > triggerPeriod))
+  {
+    prevTriggData = true;
+    prevTriggResetData = true;
+    bleGamepad.release(BUTTON_2);
+    changed = true;
+    if (DEBUG)
+    {
+      Serial.println("Trigger Release");
+    }
+  }
   else if(!digitalRead(TRIGG_PIN) && prevTriggData && (millis() - triggerTime > triggerPeriod))
   {
     prevTriggData = false;
+    prevTriggResetData = false;
     bleGamepad.release(BUTTON_2);
     changed = true;
     if (DEBUG)
@@ -670,5 +683,9 @@ void loop()
   if(DEBUG_ADV)
   {
     delay(1000);
+  }
+  else
+  {
+    delay(2);
   }
 }
