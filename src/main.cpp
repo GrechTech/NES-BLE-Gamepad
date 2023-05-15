@@ -34,9 +34,9 @@ padTypes currentType = noPad; // Stores the current pad type
 uint16_t prevPadData = 65535;     // Previous state of game/power pad state
 bool prevTriggData = false;     // Previous state of Zapper trigger
 bool prevLightData = true;      // Previous state of Zapper light sensor
-uint16_t triggerPeriod = 200;
+uint16_t triggerPeriod = 100;
 unsigned long triggerTime = 0;
-uint16_t lightPeriod = 500;
+uint16_t lightPeriod = 20;
 unsigned long lightTime = 0;
 
 
