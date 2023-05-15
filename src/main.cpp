@@ -54,6 +54,10 @@ inline void setupBluetooth() // Setup the Bluetooth gamepad service
   bleGamepadConfig.setIncludeRzAxis(false);
   bleGamepadConfig.setIncludeSlider1(false);
   bleGamepadConfig.setIncludeSlider2(false);
+
+  bleGamepadConfig.setButtonCount(12);  
+  bleGamepadConfig.setIncludeStart(true);
+  bleGamepadConfig.setIncludeSelect(true);
   
   bleGamepadConfig.setAutoReport(false); // Manually handle reports, for performance
 
@@ -89,9 +93,6 @@ inline void setupGamepad()
 {
   bleGamepad.deviceName = "NES Game Pad";
   setupShiftReg();
-  bleGamepadConfig.setButtonCount(2); 
-  bleGamepadConfig.setIncludeStart(true);
-  bleGamepadConfig.setIncludeSelect(true);
   setupBluetooth();
 
   currentType = gamePad;
@@ -106,7 +107,6 @@ inline void setupPowerpad()
 {
   bleGamepad.deviceName = "NES Power Pad";
   setupShiftReg();
-  bleGamepadConfig.setButtonCount(12); 
   setupBluetooth();
 
   currentType = powerPad;
@@ -123,8 +123,6 @@ inline void setupZapper()
   pinMode(LIGHT_PIN, INPUT_PULLUP);
   pinMode(TRIGG_PIN, INPUT_PULLUP); // Tomee Zapp has a simple switch NC to GND. 
   // When trigger pulled, switch disconnected from GND allowing it to be pulled up
-
-  bleGamepadConfig.setButtonCount(2); 
   setupBluetooth();
 
   currentType = zapperPad;
