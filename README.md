@@ -1,7 +1,7 @@
 ------------------------
 Instructions
 ------------------------
-Available on the Wiki page: https://github.com/GrechTech/NES-BLE-Gamepad/wiki
+Available on the wiki page: https://github.com/GrechTech/NES-BLE-Gamepad/wiki
 
 -----------
 Description 
