@@ -28,6 +28,7 @@ enum padTypes // Defines the supported types of NES controller input
 //---------- CONFIG ----------//
 const padTypes forceMode = noPad; // Force a given pad mode, Auto detect if noPad selected
 const bool compressPowerpad = true; // Force a given pad mode, Auto detect if noPad selected
+const bool emulatorMapping = true; // Force a given pad mode, Auto detect if noPad selected
 const bool DEBUG = false; // Enable for serial monitor priority debug outputs
 const bool DEBUG_ADV = false; // Enable for serial monitor advanced debug outputs
 const uint16_t triggerPeriod = 100;   // Trigger debounce & reset time (ms)

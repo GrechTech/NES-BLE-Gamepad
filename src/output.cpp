@@ -48,6 +48,23 @@ void outputDirect(bool press, uint8_t input) // Output a button directly
         bleGamepad.press(input);
 }
 
+void inline pressSelect(bool input)
+{
+    if(input)
+    {
+        pressSelect(true);
+        if(emulatorMapping)
+            bleGamepad.press(BUTTON_5);
+    }
+    else
+    {
+        pressSelect(false);
+        if(emulatorMapping)
+            bleGamepad.release(BUTTON_5);
+    }
+    
+}
+
 void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gamepad value data
 {
     if((bitRead(gamepadData ,  7 - 0) == LOW) && (bitRead(prevPadData ,7 -  0) == HIGH))  // Inverted
@@ -86,7 +103,7 @@ void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gam
 
     if((bitRead(gamepadData , 7 - 2) == LOW) && (bitRead(prevPadData , 7 - 2) == HIGH)) 
     {
-      bleGamepad.pressSelect();
+      pressSelect(true);
       if (DEBUG)
       {
         Serial.println("# BTN: Select Pressed");
@@ -94,7 +111,7 @@ void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gam
     }
     else if((bitRead(gamepadData , 7 - 2) == HIGH) && (bitRead(prevPadData , 7 - 2) == LOW)) 
     {
-      bleGamepad.releaseSelect();
+      pressSelect(false);
       if (DEBUG)
       {
         Serial.println("# BTN: Select Released");
@@ -229,32 +246,32 @@ void outputPowerpad(bool press, uint8_t btn) // Output using powerpad value data
     {
       if (btn == PowerPadBtnMap[0])
       {
-        bleGamepad.pressSelect();
+        pressSelect(true);
         bleGamepad.setHat1(1);
       }
       else if (btn == PowerPadBtnMap[1])
       {
-        bleGamepad.pressSelect();
+        pressSelect(true);
         bleGamepad.setHat1(3);
       }
       else if (btn == PowerPadBtnMap[2])
       {
-        bleGamepad.pressSelect();
+        pressSelect(true);
         bleGamepad.setHat1(5);
       }
       else if (btn == PowerPadBtnMap[3])
       {
-        bleGamepad.pressSelect();
+        pressSelect(true);
         bleGamepad.setHat1(7);
       }
       else if (btn == PowerPadBtnMap[4])
       {
-        bleGamepad.pressSelect();
+        pressSelect(true);
         bleGamepad.press(BUTTON_1);
       }
       else if (btn == PowerPadBtnMap[5])
       {
-        bleGamepad.pressSelect();
+        pressSelect(true);
         bleGamepad.press(BUTTON_4);
       }
       else if (btn == PowerPadBtnMap[6])
@@ -292,32 +309,32 @@ void outputPowerpad(bool press, uint8_t btn) // Output using powerpad value data
     {
       if (btn == PowerPadBtnMap[0])
       {
-        bleGamepad.releaseSelect();
+        pressSelect(false);
         bleGamepad.setHat1(0);
       }
       else if (btn == PowerPadBtnMap[1])
       {
-        bleGamepad.releaseSelect();
+        pressSelect(false);
         bleGamepad.setHat1(0);
       }
       else if (btn == PowerPadBtnMap[2])
       {
-        bleGamepad.releaseSelect();
+        pressSelect(false);
         bleGamepad.setHat1(0);
       }
       else if (btn == PowerPadBtnMap[3])
       {
-        bleGamepad.releaseSelect();
+        pressSelect(false);
         bleGamepad.setHat1(0);
       }
       else if (btn == PowerPadBtnMap[4])
       {
-        bleGamepad.releaseSelect();
+        pressSelect(false);
         bleGamepad.release(BUTTON_1);
       }
       else if (btn == PowerPadBtnMap[5])
       {
-        bleGamepad.releaseSelect();
+        pressSelect(false);
         bleGamepad.release(BUTTON_4);
       }
       else if (btn == PowerPadBtnMap[6])
