@@ -20,7 +20,7 @@ void setupBluetooth() // Setup the Bluetooth gamepad service
   if(compressPowerpad)
     bleGamepadConfig.setButtonCount(12);  
   else
-    bleGamepadConfig.setButtonCount(2);  
+    bleGamepadConfig.setButtonCount(10);  
 
   bleGamepadConfig.setIncludeStart(true);
   bleGamepadConfig.setIncludeSelect(true);
@@ -69,7 +69,7 @@ void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gam
 
     if((bitRead(gamepadData , 7 - 1) == LOW) && (bitRead(prevPadData , 7 - 1) == HIGH)) 
     {
-      bleGamepad.press(BUTTON_2);
+      bleGamepad.press(BUTTON_4);
       if (DEBUG)
       {
         Serial.println("# BTN: B Pressed");
@@ -77,7 +77,7 @@ void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gam
     }  
     else if((bitRead(gamepadData , 7 - 1) == HIGH) && (bitRead(prevPadData , 7 - 1) == LOW)) 
     {
-      bleGamepad.release(BUTTON_2);
+      bleGamepad.release(BUTTON_4);
       if (DEBUG)
       {
         Serial.println("# BTN: B Released");
@@ -255,7 +255,7 @@ void outputPowerpad(bool press, uint8_t btn) // Output using powerpad value data
       else if (btn == PowerPadBtnMap[5])
       {
         bleGamepad.pressSelect();
-        bleGamepad.press(BUTTON_2);
+        bleGamepad.press(BUTTON_4);
       }
       else if (btn == PowerPadBtnMap[6])
       {
@@ -285,7 +285,7 @@ void outputPowerpad(bool press, uint8_t btn) // Output using powerpad value data
       else if (btn == PowerPadBtnMap[11])
       {
         bleGamepad.pressStart();
-        bleGamepad.press(BUTTON_2);
+        bleGamepad.press(BUTTON_4);
       }    
     }
     else //if not press
@@ -318,7 +318,7 @@ void outputPowerpad(bool press, uint8_t btn) // Output using powerpad value data
       else if (btn == PowerPadBtnMap[5])
       {
         bleGamepad.releaseSelect();
-        bleGamepad.release(BUTTON_2);
+        bleGamepad.release(BUTTON_4);
       }
       else if (btn == PowerPadBtnMap[6])
       {
@@ -348,7 +348,7 @@ void outputPowerpad(bool press, uint8_t btn) // Output using powerpad value data
       else if (btn == PowerPadBtnMap[11])
       {
         bleGamepad.releaseStart();
-        bleGamepad.release(BUTTON_2);
+        bleGamepad.release(BUTTON_4);
       }    
     }
   }
