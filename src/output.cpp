@@ -35,12 +35,12 @@ void setupBluetooth() // Setup the Bluetooth gamepad service
   }
 }
 
-bool connected()
+bool connected() // Check if Bluetooth connected
 {
     return bleGamepad.isConnected();
 }
 
-void outputDirect(bool press, uint8_t input)
+void outputDirect(bool press, uint8_t input) // Output a button directly
 {
     if(press)
         bleGamepad.press(input);
@@ -48,7 +48,7 @@ void outputDirect(bool press, uint8_t input)
         bleGamepad.press(input);
 }
 
-void outputGamepad(uint8_t gamepadData, uint8_t prevPadData)
+void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gamepad value data
 {
     if((bitRead(gamepadData ,  7 - 0) == LOW) && (bitRead(prevPadData ,7 -  0) == HIGH))  // Inverted
     {
@@ -221,7 +221,7 @@ void outputGamepad(uint8_t gamepadData, uint8_t prevPadData)
     }
 }
 
-void outputPowerpad(bool press, uint8_t btn)
+void outputPowerpad(bool press, uint8_t btn) // Output using powerpad value data
 {
   if(compressPowerpad)
   {
@@ -358,7 +358,7 @@ void outputPowerpad(bool press, uint8_t btn)
   }
 }
 
-void updatePad()
+void updatePad() // Send bluetooth update report
 {
     bleGamepad.sendReport();
 }

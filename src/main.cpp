@@ -1,7 +1,5 @@
 #include "main.h"
 
-//---------- CONFIG ----------//
-
 // REGISTERS
 padTypes currentType = noPad; // Stores the current pad type
 uint16_t prevPadData = 65535;   // Previous state of game/power pad state
@@ -11,8 +9,7 @@ bool prevLightData = true;      // Previous state of Zapper light sensor
 unsigned long triggerTime = 0;  // Time of last trigger pull
 unsigned long lightTime = 0;    // Time of last light sense
 
-
-// SETUP FINAL FUNCTIONS
+// SETUP
 inline void setupGamepad()
 {
   setupShiftReg();
@@ -55,6 +52,7 @@ inline void setupZapper()
 }
 
 
+// READ
 inline void readGamepad()
 {
   uint8_t gamepadData = (uint8_t)readShiftReg(false); // Get state
@@ -65,8 +63,6 @@ inline void readGamepad()
 
   prevPadData = (uint16_t)gamepadData;
 }
-
-
 
 inline void readPowerpad()
 {
@@ -257,6 +253,7 @@ inline padTypes detectType()
   }  
 }
 
+// MAIN
 void setup()
 {
   padTypes type = forceMode; // Represents the type of NES accessory

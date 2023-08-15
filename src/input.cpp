@@ -18,8 +18,7 @@ void setupShiftReg() // Setup pins to read 4021 shift register(s)
   }
 }
 
-// READ FUNCTIONS
-uint16_t readShiftReg(bool powerpad) 
+uint16_t readShiftReg(bool powerpad) // read 4021 shift register(s)
 {
   // Setup local registers for each input
   uint8_t gamepadData = 0; 
@@ -100,4 +99,3 @@ uint16_t readShiftReg(bool powerpad)
     return (uint16_t)gamepadData;
   }
 }
-
