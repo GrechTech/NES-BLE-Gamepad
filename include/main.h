@@ -37,4 +37,16 @@ const uint16_t triggerPeriod = 100;   // Trigger debounce & reset time (ms)
 const uint16_t lightPeriod = 20;      // Light sensor input debounce time (ms)
 const bool compressPowerpad = true; // Force a given pad mode, Auto detect if noPad selected
 
+// INPUT
+void setupShiftReg();
+uint16_t readShiftReg(bool powerpad);
+
+// OUTPUT
+void setupBluetooth(void);
+bool connected(void);
+void updatePad(void);
+void outputDirect(bool press, uint8_t input);
+void outputPowerpad(bool press, uint8_t btn);
+void outputGamepad(uint8_t gamepadData, uint8_t prevPadData);
+
 #endif
