@@ -102,12 +102,10 @@ inline void readPowerpad()
         }
       }
     }
-
-    prevPadData = powerpadData;
-    updatePad();
   }
-
-
+  
+  prevPadData = powerpadData;
+  updatePad();
 }
 
 inline void readZapper()
