@@ -33,7 +33,7 @@ const bool DEBUG = true; // Enable for serial monitor priority debug outputs
 const bool DEBUG_ADV = false; // Enable for serial monitor advanced debug outputs
 const uint16_t triggerPeriod = 100;   // Trigger debounce & reset time (ms)
 const uint16_t lightPeriod = 20;      // Light sensor input debounce time (ms)
-const uint8_t PowerPadBtnMap [12] = {2, 1, 5, 9, 6, 10, 11, 7, 4, 3, 12, 8};
+const uint8_t PowerPadBtnMap [12] = {1, 0, 4, 8, 5, 9, 10, 6, 3, 2, 11, 7};
 
 // PROTOTYPES
 // INPUT
@@ -45,7 +45,7 @@ void setupBluetooth(void);
 bool connected(void);
 void updatePad(void);
 void outputDirect(bool press, uint8_t input);
-void outputPowerpad(bool press, uint8_t btn);
+void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData);
 void outputGamepad(uint8_t gamepadData, uint8_t prevPadData);
 
 #endif

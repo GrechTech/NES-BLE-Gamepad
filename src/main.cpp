@@ -70,36 +70,44 @@ inline void readPowerpad()
 
   uint16_t powerpadData = readShiftReg(true); // Get state
 
-  if(powerpadData != prevPadData) // If state changed
+  if(compressPowerpad)
   {
-    for(int n = 0; n < 12; n++)
+    outputPowerpad(powerpadData, prevPadData);
+  }
+  else //if not compressPowerpad
+  {
+    if(powerpadData != prevPadData) // If state changed
     {
-      if( ( bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
+      for(int n = 0; n < 12; n++)
       {
-        outputPowerpad(true,PowerPadBtnMap[n]);
-        if (DEBUG)
+        if( ( bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
         {
-          Serial.print("# BTN: ");
-          Serial.print(PowerPadBtnMap[n]);
-          Serial.println(" Pressed");
+          outputDirect(true,PowerPadBtnMap[n]);
+          if (DEBUG)
+          {
+            Serial.print("# BTN: ");
+            Serial.print(PowerPadBtnMap[n]);
+            Serial.println(" Pressed");
+          }
         }
-      }
-      else if( ( bitRead(powerpadData, 11 - n) == HIGH) && ( bitRead(prevPadData, 11 - n) == LOW) ) 
-      {
-        outputPowerpad(false,PowerPadBtnMap[n]);
-        if (DEBUG)
+        else if( ( bitRead(powerpadData, 11 - n) == HIGH) && ( bitRead(prevPadData, 11 - n) == LOW) ) 
         {
-          Serial.print("# BTN: ");
-          Serial.print(PowerPadBtnMap[n]);
-          Serial.println(" Released");
+          outputDirect(false,PowerPadBtnMap[n]);
+          if (DEBUG)
+          {
+            Serial.print("# BTN: ");
+            Serial.print(PowerPadBtnMap[n]);
+            Serial.println(" Released");
+          }
         }
       }
     }
 
+    prevPadData = powerpadData;
     updatePad();
   }
 
-  prevPadData = powerpadData;
+
 }
 
 inline void readZapper()
@@ -352,6 +360,10 @@ void loop()
   if(DEBUG_ADV)
   {
     delay(1000);
+  }
+  else if(currentType == powerPad && compressPowerpad)
+  {
+    delay(16);
   }
   else
   {
