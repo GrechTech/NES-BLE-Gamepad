@@ -8,31 +8,35 @@ BleGamepadConfiguration bleGamepadConfig;     // Sstore all of the Bluetooth opt
 // SETUP BASE FUNCTIONS
 void setupBluetooth() // Setup the Bluetooth gamepad service
 {
-  bleGamepad.deviceName = "NES BLE Gamepad";
-  bleGamepadConfig.setHatSwitchCount(1);    // Set a single D-Pad
-  bleGamepadConfig.setIncludeZAxis(false);  // Simplify the HID report 
-  bleGamepadConfig.setIncludeRxAxis(false); // By removing unused axis
-  bleGamepadConfig.setIncludeRyAxis(false);
-  bleGamepadConfig.setIncludeRzAxis(false);
-  bleGamepadConfig.setIncludeSlider1(false);
-  bleGamepadConfig.setIncludeSlider2(false);
+    bleGamepad.deviceName = "NES BLE Gamepad";
+    bleGamepadConfig.setHatSwitchCount(1);    // Set a single D-Pad
+    bleGamepadConfig.setIncludeZAxis(false);  // Simplify the HID report 
+    bleGamepadConfig.setIncludeRxAxis(false); // By removing unused axis
+    bleGamepadConfig.setIncludeRyAxis(false);
+    bleGamepadConfig.setIncludeRzAxis(false);
+    bleGamepadConfig.setIncludeSlider1(false);
+    bleGamepadConfig.setIncludeSlider2(false);
 
-  if(compressPowerpad)
-    bleGamepadConfig.setButtonCount(12);  
-  else
-    bleGamepadConfig.setButtonCount(10);  
+    if(compressPowerpad)
+    {
+        bleGamepadConfig.setButtonCount(12);  
+    }
+    else
+    {
+        bleGamepadConfig.setButtonCount(6);  
+    }
 
-  bleGamepadConfig.setIncludeStart(true);
-  bleGamepadConfig.setIncludeSelect(true);
-  
-  bleGamepadConfig.setAutoReport(false); // Manually handle reports, for performance
+    bleGamepadConfig.setIncludeStart(true);
+    bleGamepadConfig.setIncludeSelect(true);
+    
+    bleGamepadConfig.setAutoReport(false); // Manually handle reports, for performance
 
-  bleGamepad.begin(&bleGamepadConfig);
+    bleGamepad.begin(&bleGamepadConfig);
 
-  if (DEBUG)
-  {
-    Serial.println("##### Done Setup BLE");
-  }
+    if (DEBUG)
+    {
+        Serial.println("##### Done Setup BLE");
+    }
 }
 
 bool connected() // Check if Bluetooth connected
@@ -45,22 +49,24 @@ void outputDirect(bool press, uint8_t input) // Output a button directly
     if(press)
         bleGamepad.press(input);
     else
-        bleGamepad.press(input);
+        bleGamepad.release(input);
 }
 
 void inline pressSelect(bool input)
 {
     if(input)
     {
-        pressSelect(true);
         if(emulatorMapping)
             bleGamepad.press(BUTTON_5);
+        else
+            bleGamepad.pressSelect();
     }
     else
     {
-        pressSelect(false);
         if(emulatorMapping)
             bleGamepad.release(BUTTON_5);
+        else
+            bleGamepad.releaseSelect();
     }
     
 }

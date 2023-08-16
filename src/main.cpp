@@ -132,7 +132,7 @@ inline void readZapper()
   {
     prevTriggData = true;
     prevTriggResetData = false;
-    outputDirect(true,2);
+    outputDirect(true,4);
     changed = true;
     triggerTime = millis();
     if (DEBUG)
@@ -144,7 +144,7 @@ inline void readZapper()
   {
     prevTriggData = true;
     prevTriggResetData = true;
-    outputDirect(false,2);
+    outputDirect(false,4);
     changed = true;
     if (DEBUG)
     {
@@ -155,7 +155,7 @@ inline void readZapper()
   {
     prevTriggData = false;
     prevTriggResetData = false;
-    outputDirect(false,2);
+    outputDirect(false,4);
     changed = true;
     if (DEBUG)
     {
