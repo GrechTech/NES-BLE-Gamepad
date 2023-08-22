@@ -20,11 +20,11 @@ void setupBluetooth() // Setup the Bluetooth gamepad service
 
   if(compressPowerpad)
   {
-    bleGamepadConfig.setButtonCount(12);  
+    bleGamepadConfig.setButtonCount(6);  
   }
   else
   {
-    bleGamepadConfig.setButtonCount(6);  
+    bleGamepadConfig.setButtonCount(12);  
   }
 
   bleGamepadConfig.setIncludeStart(true);
