@@ -4,6 +4,7 @@
 // DYNAMIC
 BleGamepad bleGamepad("NES Controller", "GrechTech", 100); // Initialise Bluetooth gamepad
 BleGamepadConfiguration bleGamepadConfig;     // Sstore all of the Bluetooth options
+bool oddframe = false;
 
 // SETUP BASE FUNCTIONS
 void setupBluetooth() // Setup the Bluetooth gamepad service
@@ -244,8 +245,6 @@ void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gam
     }
 }
 
-
-
 void resetAll()
 {
     bleGamepad.setHat1(0);
@@ -255,11 +254,8 @@ void resetAll()
     bleGamepad.release(BUTTON_4);
 }
 
-bool oddframe = false;
-
 inline void CompressPowerpad(uint8_t btn)
 {
-    oddframe = !oddframe;
     if(oddframe)
     {
         if (btn == 0)
@@ -318,6 +314,7 @@ inline void CompressPowerpad(uint8_t btn)
 
 void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData) // Output using powerpad value data
 {
+    oddframe = !oddframe;
     if(oddframe)
     {
         resetAll();
