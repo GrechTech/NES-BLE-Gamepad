@@ -339,6 +339,8 @@ void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData) // Output using p
     }
     else
     {
+        resetAll();
+        bleGamepad.pressStart();
         for(int n = 6; n < 12; n++)
         {
             if( ( bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
