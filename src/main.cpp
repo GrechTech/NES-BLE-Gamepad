@@ -9,49 +9,6 @@ bool prevLightData = true;      // Previous state of Zapper light sensor
 unsigned long triggerTime = 0;  // Time of last trigger pull
 unsigned long lightTime = 0;    // Time of last light sense
 
-// SETUP
-inline void setupGamepad()
-{
-  setupShiftReg();
-  setupBluetooth();
-
-  currentType = gamePad;
-
-  if (DEBUG)
-  {
-    Serial.println("#### Done Setup Game Pad");
-  }
-}
-
-inline void setupPowerpad()
-{
-  setupShiftReg();
-  setupBluetooth();
-
-  currentType = powerPad;
-
-  if (DEBUG)
-  {
-    Serial.println("#### Done Setup Power Pad");
-  }
-}
-
-inline void setupZapper()
-{
-  pinMode(LIGHT_PIN, INPUT_PULLUP);
-  pinMode(TRIGG_PIN, INPUT_PULLUP); // Tomee Zapp has a simple switch NC to GND. 
-  // When trigger pulled, switch disconnected from GND allowing it to be pulled up
-  setupBluetooth();
-
-  currentType = zapperPad;
-
-  if (DEBUG)
-  {
-    Serial.println("#### Done Setup Zapper Pad");
-  }
-}
-
-
 // READ
 inline void readGamepad()
 {
@@ -302,26 +259,55 @@ void setup()
         Serial.println("### No controller detected");
       }
       break;
-    case gamePad:
+    case gamePad: // Setup gamepad
       if (DEBUG)
       {
         Serial.println("### Start Setup Game Pad");
       }  
-      setupGamepad();
+
+      setupShiftReg();
+      setupBluetooth();
+
+      currentType = gamePad;
+
+      if (DEBUG)
+      {
+        Serial.println("#### Done Setup Game Pad");
+      }
       break;
-    case powerPad:
+    case powerPad: // Setup powerpad
       if (DEBUG)
       {
         Serial.println("### Start Setup Power Pad");
       }
-      setupPowerpad();
+
+      setupShiftReg();
+      setupBluetooth();
+
+      currentType = powerPad;
+
+      if (DEBUG)
+      {
+        Serial.println("#### Done Setup Power Pad");
+      }
       break;
-    case zapperPad:
+    case zapperPad: // Setup zapper
       if (DEBUG)
       {
         Serial.println("### Start Setup Zapper");
       }
-      setupZapper();
+
+      pinMode(LIGHT_PIN, INPUT_PULLUP);
+      pinMode(TRIGG_PIN, INPUT_PULLUP); // Tomee Zapp has a simple switch NC to GND. 
+      // When trigger pulled, switch disconnected from GND allowing it to be pulled up
+      setupBluetooth();
+
+      currentType = zapperPad;
+
+      if (DEBUG)
+      {
+        Serial.println("#### Done Setup Zapper Pad");
+      }
       break;
   }
 
