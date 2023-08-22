@@ -256,73 +256,64 @@ void resetAll()
 
 inline void CompressPowerpad(uint8_t btn)
 {
-  if(oddframe)
+  if (btn == 0 or btn == 6)
   {
-    if (btn == 0)
-    {
-      bleGamepad.setHat1(1);
-    }
-    else if (btn == 1)
-    {
-      bleGamepad.setHat1(3);
-    }
-    else if (btn == 2)
-    {
-      bleGamepad.setHat1(5);
-    }
-    else if (btn == 3)
-    {
-      bleGamepad.setHat1(7);
-    }
-    else if (btn == 4)
-    {
-      bleGamepad.press(BUTTON_1);
-    }
-    else if (btn == 5)
-    {
-      bleGamepad.press(BUTTON_4);
-    }
+    bleGamepad.setHat1(1);
   }
-  else
+  else if (btn == 1 or btn == 7)
   {
-    if (btn == 6)
-    {
-      bleGamepad.setHat1(1);
-    }
-    else if (btn == 7)
-    {
-      bleGamepad.setHat1(3);
-    }
-    else if (btn == 8)
-    {
-      bleGamepad.setHat1(5);
-    }
-    else if (btn == 9)
-    {
-      bleGamepad.setHat1(7);
-    }
-    else if (btn == 10)
-    {
-      bleGamepad.press(BUTTON_1);
-    }
-    else if (btn == 11)
-    {
-      bleGamepad.press(BUTTON_4);
-    }    
+    bleGamepad.setHat1(3);
+  }
+  else if (btn == 2 or btn == 8)
+  {
+    bleGamepad.setHat1(5);
+  }
+  else if (btn == 3 or btn == 9)
+  {
+    bleGamepad.setHat1(7);
+  }
+  else if (btn == 4 or btn == 10)
+  {
+    bleGamepad.press(BUTTON_1);
+  }
+  else if (btn == 5 or btn == 11)
+  {
+    bleGamepad.press(BUTTON_4);
   }
 }
 
-void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData) // Output using powerpad value data
+void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData, bool compressed) // Output using powerpad value data
 {
-  oddframe = !oddframe; // Invert the boolean on each call
-  if(oddframe)          // If on an odd case, use Select and Buttons 1-5
+  if(compressed)
   {
-    resetAll();
-    pressSelect(true);
-
-    if(powerpadData != prevPadData) // If state changed
+    oddframe = !oddframe; // Invert the boolean on each call
+    if(oddframe)          // If on an odd case, use Select and Buttons 1-5
     {
-      for(int n = 0; n < 6; n++)
+      resetAll();
+      pressSelect(true);
+
+      if(powerpadData != prevPadData) // If state changed
+      {
+        for(int n = 0; n < 6; n++)
+        {
+          if((bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
+          {
+            CompressPowerpad(PowerPadBtnMap[n]);
+            if (DEBUG)
+            {
+              Serial.print("# BTN: ");
+              Serial.print(PowerPadBtnMap[n]);
+              Serial.println(" Pressed");
+            }
+          }
+        }
+      }
+    }
+    else          // If on an even case, use Start and Buttons 6-12
+    {
+      resetAll();
+      bleGamepad.pressStart();
+      for(int n = 6; n < 12; n++)
       {
         if((bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
         {
@@ -337,20 +328,31 @@ void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData) // Output using p
       }
     }
   }
-  else          // If on an even case, use Start and Buttons 6-12
+  else
   {
-    resetAll();
-    bleGamepad.pressStart();
-    for(int n = 6; n < 12; n++)
+    if(powerpadData != prevPadData) // If state changed
     {
-      if((bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
+      for(int n = 0; n < 12; n++)
       {
-        CompressPowerpad(PowerPadBtnMap[n]);
-        if (DEBUG)
+        if( ( bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
         {
-          Serial.print("# BTN: ");
-          Serial.print(PowerPadBtnMap[n]);
-          Serial.println(" Pressed");
+          outputDirect(true,PowerPadBtnMap[n]);
+          if (DEBUG)
+          {
+            Serial.print("# BTN: ");
+            Serial.print(PowerPadBtnMap[n]);
+            Serial.println(" Pressed");
+          }
+        }
+        else if( ( bitRead(powerpadData, 11 - n) == HIGH) && ( bitRead(prevPadData, 11 - n) == LOW) ) 
+        {
+          outputDirect(false,PowerPadBtnMap[n]);
+          if (DEBUG)
+          {
+            Serial.print("# BTN: ");
+            Serial.print(PowerPadBtnMap[n]);
+            Serial.println(" Released");
+          }
         }
       }
     }

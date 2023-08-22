@@ -27,39 +27,7 @@ inline void readPowerpad()
 
   uint16_t powerpadData = readShiftReg(true); // Get state
 
-  if(compressPowerpad)
-  {
-    outputPowerpad(powerpadData, prevPadData);
-  }
-  else //if not compressPowerpad
-  {
-    if(powerpadData != prevPadData) // If state changed
-    {
-      for(int n = 0; n < 12; n++)
-      {
-        if( ( bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
-        {
-          outputDirect(true,PowerPadBtnMap[n]);
-          if (DEBUG)
-          {
-            Serial.print("# BTN: ");
-            Serial.print(PowerPadBtnMap[n]);
-            Serial.println(" Pressed");
-          }
-        }
-        else if( ( bitRead(powerpadData, 11 - n) == HIGH) && ( bitRead(prevPadData, 11 - n) == LOW) ) 
-        {
-          outputDirect(false,PowerPadBtnMap[n]);
-          if (DEBUG)
-          {
-            Serial.print("# BTN: ");
-            Serial.print(PowerPadBtnMap[n]);
-            Serial.println(" Released");
-          }
-        }
-      }
-    }
-  }
+  outputPowerpad(powerpadData, prevPadData, compressPowerpad);
   
   prevPadData = powerpadData;
   updatePad();

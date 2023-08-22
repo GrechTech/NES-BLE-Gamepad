@@ -45,7 +45,7 @@ void setupBluetooth(void);
 bool connected(void);
 void updatePad(void);
 void outputDirect(bool press, uint8_t input);
-void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData);
+void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData, bool compressed);
 void outputGamepad(uint8_t gamepadData, uint8_t prevPadData);
 
 #endif
