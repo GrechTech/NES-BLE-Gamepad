@@ -239,19 +239,16 @@ void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData, bool compressed) 
       resetAll();
       pressSelect(true);
 
-      if(powerpadData != prevPadData) // If state changed
+      for(int n = 0; n < 6; n++)
       {
-        for(int n = 0; n < 6; n++)
+        if((bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
         {
-          if((bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
+          CompressPowerpad(PowerPadBtnMap[n]);
+          if (DEBUG)
           {
-            CompressPowerpad(PowerPadBtnMap[n]);
-            if (DEBUG)
-            {
-              Serial.print("# BTN: ");
-              Serial.print(PowerPadBtnMap[n]);
-              Serial.println(" Pressed");
-            }
+            Serial.print("# BTN: ");
+            Serial.print(PowerPadBtnMap[n]);
+            Serial.println(" Pressed");
           }
         }
       }
@@ -260,6 +257,7 @@ void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData, bool compressed) 
     {
       resetAll();
       bleGamepad.pressStart();
+
       for(int n = 6; n < 12; n++)
       {
         if((bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
@@ -274,6 +272,7 @@ void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData, bool compressed) 
         }
       }
     }
+    
     bleGamepad.sendReport();
   }
   else

@@ -63,7 +63,6 @@ padTypes detectType()
   else if(!gamepadIndicator && !powerpadIndicator && zapperIndicator)
   {
     if (DEBUG)
-
       Serial.println("#### Zapper Mode");
     
     return zapperPad;
@@ -71,7 +70,6 @@ padTypes detectType()
   else
   {
     if (DEBUG)
-
       Serial.println("#### Detection Failed");
     
     return noPad;
