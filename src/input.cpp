@@ -201,7 +201,6 @@ uint16_t readZapper()
   {
     prevTriggData = true;
     prevTriggResetData = false;
-    outputDirect(true,4);
     changed = true;
     triggerTime = millis();
     if (DEBUG)
@@ -213,7 +212,6 @@ uint16_t readZapper()
   {
     prevTriggData = true;
     prevTriggResetData = true;
-    outputDirect(false,4);
     changed = true;
     if (DEBUG)
       Serial.println("Trigger Release");
@@ -222,7 +220,6 @@ uint16_t readZapper()
   {
     prevTriggData = false;
     prevTriggResetData = false;
-    outputDirect(false,4);
     changed = true;
     if (DEBUG)
       Serial.println("Trigger Off");

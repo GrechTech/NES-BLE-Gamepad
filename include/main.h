@@ -45,7 +45,6 @@ uint16_t readZapper();
 // OUTPUT
 void setupBluetooth(void);
 bool connected(void);
-void outputDirect(bool press, uint8_t input);
 void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData, bool compressed);
 void outputGamepad(uint8_t gamepadData, uint8_t prevPadData);
 void outputZapper(uint8_t zapperData, uint8_t prevPadData);

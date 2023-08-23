@@ -39,12 +39,22 @@ bool connected() // Check if Bluetooth connected
   return bleGamepad.isConnected();
 }
 
-void outputDirect(bool press, uint8_t input) // Output a button directly
+inline void outputDirect(bool press, uint8_t input) // Output a button directly
 {
   if(press)
     bleGamepad.press(input);
   else
     bleGamepad.release(input);
+
+  if (DEBUG)
+  {
+    Serial.print("# BTN: ");
+    Serial.print(input);
+    if(press)
+      Serial.println(" Pressed");
+    else
+      Serial.println(" Released");
+  }
 }
 
 inline void pressSelect(bool input)
@@ -63,7 +73,6 @@ inline void pressSelect(bool input)
     else
       bleGamepad.releaseSelect();
   }
-    
 }
 
 void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gamepad value data
@@ -213,7 +222,7 @@ inline void resetAll()
     bleGamepad.release(BUTTON_4);
 }
 
-inline void CompressPowerpad(uint8_t btn)
+inline void compressPowerpad(uint8_t btn)
 {
   if (btn == 0 or btn == 6)
     bleGamepad.setHat1(1);
@@ -227,6 +236,13 @@ inline void CompressPowerpad(uint8_t btn)
     bleGamepad.press(BUTTON_1);
   else if (btn == 5 or btn == 11)
     bleGamepad.press(BUTTON_4);
+
+  if (DEBUG)
+  {
+    Serial.print("# BTN: ");
+    Serial.print(btn);
+    Serial.println(" Pressed");
+  }
 }
 
 void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData, bool compressed) // Output using powerpad value data
@@ -242,15 +258,7 @@ void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData, bool compressed) 
       for(int n = 0; n < 6; n++)
       {
         if((bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
-        {
-          CompressPowerpad(PowerPadBtnMap[n]);
-          if (DEBUG)
-          {
-            Serial.print("# BTN: ");
-            Serial.print(PowerPadBtnMap[n]);
-            Serial.println(" Pressed");
-          }
-        }
+          compressPowerpad(PowerPadBtnMap[n]);
       }
     }
     else          // If on an even case, use Start and Buttons 6-12
@@ -261,18 +269,10 @@ void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData, bool compressed) 
       for(int n = 6; n < 12; n++)
       {
         if((bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
-        {
-          CompressPowerpad(PowerPadBtnMap[n]);
-          if (DEBUG)
-          {
-            Serial.print("# BTN: ");
-            Serial.print(PowerPadBtnMap[n]);
-            Serial.println(" Pressed");
-          }
-        }
+          compressPowerpad(PowerPadBtnMap[n]);
       }
     }
-    
+
     bleGamepad.sendReport();
   }
   else
@@ -282,28 +282,12 @@ void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData, bool compressed) 
       for(int n = 0; n < 12; n++)
       {
         if( ( bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
-        {
           outputDirect(true,PowerPadBtnMap[n]);
-          if (DEBUG)
-          {
-            Serial.print("# BTN: ");
-            Serial.print(PowerPadBtnMap[n]);
-            Serial.println(" Pressed");
-          }
-          bleGamepad.sendReport();
-        }
         else if( ( bitRead(powerpadData, 11 - n) == HIGH) && ( bitRead(prevPadData, 11 - n) == LOW) ) 
-        {
           outputDirect(false,PowerPadBtnMap[n]);
-          if (DEBUG)
-          {
-            Serial.print("# BTN: ");
-            Serial.print(PowerPadBtnMap[n]);
-            Serial.println(" Released");
-          }
-          bleGamepad.sendReport();
-        }
       }
+
+      bleGamepad.sendReport();
     }
   }
 }
