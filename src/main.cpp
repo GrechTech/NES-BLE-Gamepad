@@ -14,8 +14,8 @@ void outputLoop();
 Scheduler ts; //Task Scheduluer
 
 //Tasks
-Task tIn ( 2 * TASK_MILLISECOND, TASK_FOREVER , &inputLoop, &ts, true );
-Task tOut ( 16 * TASK_MILLISECOND, TASK_FOREVER , &outputLoop, &ts, true );
+Task tIn  ( 2 * TASK_MILLISECOND, TASK_FOREVER , &inputLoop,  &ts, true );
+Task tOut ( 2 * TASK_MILLISECOND, TASK_FOREVER , &outputLoop, &ts, true );
 
 // MAIN
 void setup()
@@ -31,18 +31,14 @@ void setup()
   if(forceMode == noPad)
   {
     if (DEBUG)
-    {
       Serial.print("### Auto Detect Start");
-    }
 
     while (type == noPad)
     {
       type = detectType();
 
       if (DEBUG)
-      {
         Serial.print('.');
-      }
     } 
 
     if (DEBUG)
@@ -56,15 +52,11 @@ void setup()
   {
     case noPad:
       if (DEBUG)
-      {
         Serial.println("### No controller detected");
-      }
       break;
     case gamePad: // Setup gamepad
       if (DEBUG)
-      {
         Serial.println("### Start Setup Game Pad");
-      }  
       setupShiftReg();
       setupBluetooth();
       tOut.setInterval(1 * TASK_MILLISECOND);
@@ -72,15 +64,11 @@ void setup()
       currentType = gamePad;
 
       if (DEBUG)
-      {
         Serial.println("#### Done Setup Game Pad");
-      }
       break;
     case powerPad: // Setup powerpad
       if (DEBUG)
-      {
         Serial.println("### Start Setup Power Pad");
-      }
       setupShiftReg();
       setupBluetooth();
       tOut.setInterval(16 * TASK_MILLISECOND);
@@ -88,15 +76,11 @@ void setup()
       currentType = powerPad;
 
       if (DEBUG)
-      {
         Serial.println("#### Done Setup Power Pad");
-      }
       break;
     case zapperPad: // Setup zapper
       if (DEBUG)
-      {
         Serial.println("### Start Setup Zapper");
-      }
       pinMode(LIGHT_PIN, INPUT_PULLUP);
       pinMode(TRIGG_PIN, INPUT_PULLUP); // Tomee Zapp has a simple switch NC to GND. 
       // When trigger pulled, switch disconnected from GND allowing it to be pulled up
@@ -106,16 +90,12 @@ void setup()
       currentType = zapperPad;
 
       if (DEBUG)
-      {
         Serial.println("#### Done Setup Zapper Pad");
-      }
       break;
   }
 
   if (DEBUG)
-  {
     Serial.println("### Setup Done");
-  }
 }
 
 void inputLoop()
@@ -143,9 +123,7 @@ void outputLoop()
       outputZapper(gamepadData, prevPadData);
 
     if(gamepadData != prevPadData) // If state changed
-    {
       prevPadData = gamepadData;
-    }
   }
 }
 

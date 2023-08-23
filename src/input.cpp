@@ -19,9 +19,7 @@ padTypes detectType()
   {
     gamepadIndicator = true;
     if (DEBUG)
-    {
       Serial.println("#### Game Pad Indicated");
-    }
   }
   pinMode(GAMEPAD_PIN, INPUT);
 
@@ -33,9 +31,7 @@ padTypes detectType()
   {
     powerpadIndicator = true;
     if (DEBUG)
-    {
       Serial.println("#### Power Pad Indicated");
-    }
   }
 
   // Zapper Check
@@ -45,9 +41,7 @@ padTypes detectType()
   {
     zapperIndicator = true;
     if (DEBUG)
-    {
       Serial.println("#### Zapper Indicated");
-    }
   }  
   pinMode(TRIGG_PIN, INPUT);  
 
@@ -55,33 +49,31 @@ padTypes detectType()
   if(gamepadIndicator) // Game Pad Pin only active with gamepad
   {
     if (DEBUG)
-    {
       Serial.println("#### Game Pad Mode");
-    }
+    
     return gamePad;
   }  
   else if(!gamepadIndicator && powerpadIndicator && !zapperIndicator)
   {
     if (DEBUG)
-    {
       Serial.println("#### Power Pad Mode");
-    }
+
     return powerPad;
   }  
   else if(!gamepadIndicator && !powerpadIndicator && zapperIndicator)
   {
     if (DEBUG)
-    {
+
       Serial.println("#### Zapper Mode");
-    }
+    
     return zapperPad;
   }  
   else
   {
     if (DEBUG)
-    {
+
       Serial.println("#### Detection Failed");
-    }
+    
     return noPad;
   }  
 }
@@ -148,9 +140,7 @@ uint16_t readShiftReg(bool powerpad) // read 4021 shift register(s)
     delayMicroseconds(2);
 
     if (DEBUG_ADV)
-    {
       Serial.print(c);
-    }
   }
 
   if (DEBUG_ADV)
@@ -197,9 +187,8 @@ uint16_t readZapper()
     changed = true;
     lightTime = millis();
     if (DEBUG)
-    {
       Serial.println("Light On (Inverted)");
-    }
+    
     data = 1;
   }
   else if(!digitalRead(LIGHT_PIN) && prevLightData && (millis() - lightTime > lightPeriod)) 
@@ -207,9 +196,7 @@ uint16_t readZapper()
     prevLightData = false;
     changed = true;
     if (DEBUG)
-    {
       Serial.println("Light Off (Inverted)");
-    }
   }
 
   if(digitalRead(TRIGG_PIN) && !prevTriggData)
@@ -220,9 +207,8 @@ uint16_t readZapper()
     changed = true;
     triggerTime = millis();
     if (DEBUG)
-    {
-      Serial.println("Trigger On");
-    }
+      Serial.println("Trigger On");    
+
     data += 2;
   }
   else if(digitalRead(TRIGG_PIN) && prevTriggData && !prevTriggResetData && (millis() - triggerTime > triggerPeriod))
@@ -232,9 +218,7 @@ uint16_t readZapper()
     outputDirect(false,4);
     changed = true;
     if (DEBUG)
-    {
       Serial.println("Trigger Release");
-    }
   }
   else if(!digitalRead(TRIGG_PIN) && prevTriggData && (millis() - triggerTime > triggerPeriod))
   {
@@ -243,9 +227,7 @@ uint16_t readZapper()
     outputDirect(false,4);
     changed = true;
     if (DEBUG)
-    {
       Serial.println("Trigger Off");
-    }
   }
 
   return data;
