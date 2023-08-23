@@ -1,188 +1,21 @@
 #include "main.h"
+#include <TaskScheduler.h>
 
 // REGISTERS
 padTypes currentType = noPad; // Stores the current pad type
-uint16_t prevPadData = 65535;   // Previous state of game/power pad state
-bool prevTriggData = false;     // Previous state of Zapper trigger
-bool prevTriggResetData = false;// Previous state of Zapper trigger reset
-bool prevLightData = true;      // Previous state of Zapper light sensor
-unsigned long triggerTime = 0;  // Time of last trigger pull
-unsigned long lightTime = 0;    // Time of last light sense
+volatile uint16_t gamepadData = 65535;   // Previous state of game/power pad state
+volatile uint16_t prevPadData = 65535;   // Previous state of game/power pad state
 
-// READ
-inline void readGamepad()
-{
-  uint8_t gamepadData = (uint8_t)readShiftReg(false); // Get state
-  if((uint16_t)gamepadData != prevPadData) // If state changed
-  {
-    outputGamepad(gamepadData, prevPadData);
-  }
+// Task prototypes
+void inputLoop();
+void outputLoop();
 
-  prevPadData = (uint16_t)gamepadData;
-}
 
-inline void readPowerpad()
-{
-  // Button map reference https://www.nesdev.org/wiki/Power_Pad
+Scheduler ts; //Task Scheduluer
 
-  uint16_t powerpadData = readShiftReg(true); // Get state
-
-  outputPowerpad(powerpadData, prevPadData, compressPowerpad);
-  
-  prevPadData = powerpadData;
-  updatePad();
-}
-
-inline void readZapper()
-{
-  bool changed = false;
-
-  if(digitalRead(LIGHT_PIN) && !prevLightData) 
-  {
-    prevLightData = true;
-    outputDirect(false,1);
-    changed = true;
-    lightTime = millis();
-    if (DEBUG)
-    {
-      Serial.println("Light On (Inverted)");
-    }
-  }
-  else if(!digitalRead(LIGHT_PIN) && prevLightData && (millis() - lightTime > lightPeriod)) 
-  {
-    prevLightData = false;
-    outputDirect(true,1);
-    changed = true;
-    if (DEBUG)
-    {
-      Serial.println("Light Off (Inverted)");
-    }
-  }
-
-  if(digitalRead(TRIGG_PIN) && !prevTriggData)
-  {
-    prevTriggData = true;
-    prevTriggResetData = false;
-    outputDirect(true,4);
-    changed = true;
-    triggerTime = millis();
-    if (DEBUG)
-    {
-      Serial.println("Trigger On");
-    }
-  }
-  else if(digitalRead(TRIGG_PIN) && prevTriggData && !prevTriggResetData && (millis() - triggerTime > triggerPeriod))
-  {
-    prevTriggData = true;
-    prevTriggResetData = true;
-    outputDirect(false,4);
-    changed = true;
-    if (DEBUG)
-    {
-      Serial.println("Trigger Release");
-    }
-  }
-  else if(!digitalRead(TRIGG_PIN) && prevTriggData && (millis() - triggerTime > triggerPeriod))
-  {
-    prevTriggData = false;
-    prevTriggResetData = false;
-    outputDirect(false,4);
-    changed = true;
-    if (DEBUG)
-    {
-      Serial.println("Trigger Off");
-    }
-  }
-
-  if (changed)
-  {
-    updatePad();
-    if (DEBUG)
-    {
-      Serial.print(".");
-    }
-  }
-}
-
-inline padTypes detectType()
-{
-  bool gamepadIndicator = false;
-  bool powerpadIndicator = false;
-  bool zapperIndicator = false;
-
-  // Game Pad Check
-  pinMode(GAMEPAD_PIN, INPUT_PULLDOWN);
-  delay(1);
-  if(digitalRead(GAMEPAD_PIN))
-  {
-    gamepadIndicator = true;
-    if (DEBUG)
-    {
-      Serial.println("#### Game Pad Indicated");
-    }
-  }
-  pinMode(GAMEPAD_PIN, INPUT);
-
-  // Power Pad Check
-  pinMode(POWERPAD1_PIN, INPUT_PULLDOWN);
-  pinMode(POWERPAD2_PIN, INPUT_PULLDOWN);
-  delay(1);
-  if(digitalRead(POWERPAD1_PIN) && digitalRead(POWERPAD1_PIN))
-  {
-    powerpadIndicator = true;
-    if (DEBUG)
-    {
-      Serial.println("#### Power Pad Indicated");
-    }
-  }
-
-  // Zapper Check
-  pinMode(TRIGG_PIN, INPUT_PULLUP);
-  delay(1);
-  if(!digitalRead(TRIGG_PIN))
-  {
-    zapperIndicator = true;
-    if (DEBUG)
-    {
-      Serial.println("#### Zapper Indicated");
-    }
-  }  
-  pinMode(TRIGG_PIN, INPUT);  
-
-  // Decide
-  if(gamepadIndicator) // Game Pad Pin only active with gamepad
-  {
-    if (DEBUG)
-    {
-      Serial.println("#### Game Pad Mode");
-    }
-    return gamePad;
-  }  
-  else if(!gamepadIndicator && powerpadIndicator && !zapperIndicator)
-  {
-    if (DEBUG)
-    {
-      Serial.println("#### Power Pad Mode");
-    }
-    return powerPad;
-  }  
-  else if(!gamepadIndicator && !powerpadIndicator && zapperIndicator)
-  {
-    if (DEBUG)
-    {
-      Serial.println("#### Zapper Mode");
-    }
-    return zapperPad;
-  }  
-  else
-  {
-    if (DEBUG)
-    {
-      Serial.println("#### Detection Failed");
-    }
-    return noPad;
-  }  
-}
+//Tasks
+Task tIn ( 2 * TASK_MILLISECOND, TASK_FOREVER , &inputLoop, &ts, true );
+Task tOut ( 16 * TASK_MILLISECOND, TASK_FOREVER , &outputLoop, &ts, true );
 
 // MAIN
 void setup()
@@ -232,9 +65,9 @@ void setup()
       {
         Serial.println("### Start Setup Game Pad");
       }  
-
       setupShiftReg();
       setupBluetooth();
+      tOut.setInterval(1 * TASK_MILLISECOND);
 
       currentType = gamePad;
 
@@ -248,9 +81,9 @@ void setup()
       {
         Serial.println("### Start Setup Power Pad");
       }
-
       setupShiftReg();
       setupBluetooth();
+      tOut.setInterval(16 * TASK_MILLISECOND);
 
       currentType = powerPad;
 
@@ -264,11 +97,11 @@ void setup()
       {
         Serial.println("### Start Setup Zapper");
       }
-
       pinMode(LIGHT_PIN, INPUT_PULLUP);
       pinMode(TRIGG_PIN, INPUT_PULLUP); // Tomee Zapp has a simple switch NC to GND. 
       // When trigger pulled, switch disconnected from GND allowing it to be pulled up
       setupBluetooth();
+      tOut.setInterval(1 * TASK_MILLISECOND);
 
       currentType = zapperPad;
 
@@ -285,40 +118,38 @@ void setup()
   }
 }
 
-void loop()
+void inputLoop()
 {
   if (connected())
   {
-    switch(currentType)
+    if(currentType == gamePad)
+      gamepadData = readShiftReg(false); // Get state
+    else if(currentType == powerPad)
+      gamepadData = readShiftReg(true); // Get state
+    else if(currentType == zapperPad)
+      gamepadData = readZapper();
+  }
+}
+
+void outputLoop()
+{
+  if (connected())
+  {
+    if(currentType == gamePad)
+      outputGamepad(gamepadData, prevPadData);
+    else if(currentType == powerPad)
+      outputPowerpad(gamepadData, prevPadData, compressPowerpad);
+    else if(currentType == zapperPad)
+      outputZapper(gamepadData, prevPadData);
+
+    if(gamepadData != prevPadData) // If state changed
     {
-      case noPad:
-        if (DEBUG_ADV)
-        {
-          Serial.println("ERROR: NO CONTROLLER");
-        }
-        break;
-      case gamePad:
-        readGamepad();
-        break;
-      case powerPad:
-        readPowerpad();
-        break;
-      case zapperPad:
-        readZapper();
-        break;
+      prevPadData = gamepadData;
     }
   }
+}
 
-  if(DEBUG_ADV)
-  {
-    delay(1000);
-  }
-  else if(currentType == powerPad && compressPowerpad)
-  {
-    delay(16);
-  }
-  else
-  {
-    delay(2);
-  }
+void loop()
+{
+  ts.execute();
 }
