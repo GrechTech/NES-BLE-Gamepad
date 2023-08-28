@@ -20,7 +20,7 @@ Task tOut ( 2 * TASK_MILLISECOND, TASK_FOREVER , &outputLoop, &ts, true );
 // MAIN
 void setup()
 {
-  padTypes type = forceMode; // Represents the type of NES accessory
+  currentType = forceMode; // Represents the type of NES accessory
 
   if (DEBUG)
   {
@@ -33,9 +33,9 @@ void setup()
     if (DEBUG)
       Serial.print("### Auto Detect Start");
 
-    while (type == noPad)
+    while (currentType == noPad)
     {
-      type = detectType();
+      currentType = detectType();
 
       if (DEBUG)
         Serial.print('.');
@@ -48,7 +48,7 @@ void setup()
     }
   }
 
-  switch(type)
+  switch(currentType)
   {
     case noPad:
       if (DEBUG)
@@ -61,8 +61,6 @@ void setup()
       setupBluetooth();
       tOut.setInterval(1 * TASK_MILLISECOND);
 
-      currentType = gamePad;
-
       if (DEBUG)
         Serial.println("#### Done Setup Game Pad");
       break;
@@ -72,8 +70,6 @@ void setup()
       setupShiftReg();
       setupBluetooth();
       tOut.setInterval(16 * TASK_MILLISECOND);
-
-      currentType = powerPad;
 
       if (DEBUG)
         Serial.println("#### Done Setup Power Pad");
@@ -86,8 +82,6 @@ void setup()
       // When trigger pulled, switch disconnected from GND allowing it to be pulled up
       setupBluetooth();
       tOut.setInterval(1 * TASK_MILLISECOND);
-
-      currentType = zapperPad;
 
       if (DEBUG)
         Serial.println("#### Done Setup Zapper Pad");

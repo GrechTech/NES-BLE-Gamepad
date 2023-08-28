@@ -222,7 +222,7 @@ inline void resetAll()
     bleGamepad.release(BUTTON_4);
 }
 
-inline void compressPowerpad(uint8_t btn)
+inline void CompressPowerpad(uint8_t btn)
 {
   if (btn == 0 or btn == 6)
     bleGamepad.setHat1(1);
@@ -258,7 +258,7 @@ void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData, bool compressed) 
       for(int n = 0; n < 6; n++)
       {
         if((bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
-          compressPowerpad(PowerPadBtnMap[n]);
+          CompressPowerpad(PowerPadBtnMap[n]);
       }
     }
     else          // If on an even case, use Start and Buttons 6-12
@@ -269,7 +269,7 @@ void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData, bool compressed) 
       for(int n = 6; n < 12; n++)
       {
         if((bitRead(powerpadData, 11 - n) == LOW) && ( bitRead(prevPadData, 11 - n) == HIGH)) // Inverted
-          compressPowerpad(PowerPadBtnMap[n]);
+          CompressPowerpad(PowerPadBtnMap[n]);
       }
     }
 

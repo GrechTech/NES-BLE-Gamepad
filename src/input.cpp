@@ -21,19 +21,22 @@ padTypes detectType()
     if (DEBUG)
       Serial.println("#### Game Pad Indicated");
   }
+  if(DEBUG)
+     Serial.println("Gamepad pin (18) state (Pulled down): " + digitalRead(GAMEPAD_PIN));
   pinMode(GAMEPAD_PIN, INPUT);
 
   // Power Pad Check
   pinMode(POWERPAD1_PIN, INPUT_PULLDOWN);
   pinMode(POWERPAD2_PIN, INPUT_PULLDOWN);
   delay(1);
-  if(digitalRead(POWERPAD1_PIN) && digitalRead(POWERPAD1_PIN))
+  if(digitalRead(POWERPAD1_PIN) || digitalRead(POWERPAD2_PIN))
   {
     powerpadIndicator = true;
     if (DEBUG)
       Serial.println("#### Power Pad Indicated");
   }
-
+  if(DEBUG)
+     Serial.println("Powerpad pin (21 & 19) states (Pulled up): " + digitalRead(POWERPAD1_PIN) + digitalRead(POWERPAD2_PIN));
   // Zapper Check
   pinMode(TRIGG_PIN, INPUT_PULLUP);
   delay(1);
@@ -43,8 +46,12 @@ padTypes detectType()
     if (DEBUG)
       Serial.println("#### Zapper Indicated");
   }  
+  if(DEBUG)
+     Serial.println("Gamepad pin (19) state (Pulled down - Seeking inverse): " + digitalRead(TRIGG_PIN));
   pinMode(TRIGG_PIN, INPUT);  
 
+  if(DEBUG)
+  Serial.println("Gamepad, powerpad, zapper indicators: " + gamepadIndicator + powerpadIndicator + zapperIndicator);
   // Decide
   if(gamepadIndicator) // Game Pad Pin only active with gamepad
   {
