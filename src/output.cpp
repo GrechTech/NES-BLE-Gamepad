@@ -5,6 +5,8 @@
 BleGamepad bleGamepad("NES Controller", "GrechTech", 100); // Initialise Bluetooth gamepad
 BleGamepadConfiguration bleGamepadConfig;     // Sstore all of the Bluetooth options
 bool oddframe = false;
+uint8_t B_BUTTON = BUTTON_2;
+uint8_t SELECT = BUTTON_5; // alternate Select mapping for emulator mode
 
 // SETUP BASE FUNCTIONS
 void setupBluetooth() // Setup the Bluetooth gamepad service
@@ -22,6 +24,11 @@ void setupBluetooth() // Setup the Bluetooth gamepad service
     bleGamepadConfig.setButtonCount(6);  
   else
     bleGamepadConfig.setButtonCount(12);  
+
+  if(emulatorMapping)
+    B_BUTTON = BUTTON_4;
+  else
+    B_BUTTON = BUTTON_2;
 
   bleGamepadConfig.setIncludeStart(true);
   bleGamepadConfig.setIncludeSelect(true);
@@ -61,15 +68,15 @@ inline void pressSelect(bool input) // Press the select button
 {
   if(input)
   {
-    if(emulatorMapping) // If using mapping for NES emulator on EverDrive
-      bleGamepad.press(BUTTON_5);
+    if(emulatorMapping) // If using alternate Select mapping
+      bleGamepad.press(SELECT);
     else
       bleGamepad.pressSelect();
   }
   else
   {
-    if(emulatorMapping) // If using mapping for NES emulator on EverDrive
-      bleGamepad.release(BUTTON_5);
+    if(emulatorMapping) // If using alternate Select mapping
+      bleGamepad.release(SELECT);
     else
       bleGamepad.releaseSelect();
   }
@@ -94,13 +101,13 @@ void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gam
 
     if((bitRead(gamepadData, 7 - 1) == LOW) && (bitRead(prevPadData, 7 - 1) == HIGH)) 
     {
-      bleGamepad.press(BUTTON_4);
+      bleGamepad.press(B_BUTTON);
       if (DEBUG)
         Serial.println("# BTN: B Pressed");
     }  
     else if((bitRead(gamepadData, 7 - 1) == HIGH) && (bitRead(prevPadData, 7 - 1) == LOW)) 
     {
-      bleGamepad.release(BUTTON_4);
+      bleGamepad.release(B_BUTTON);
       if (DEBUG)
         Serial.println("# BTN: B Released");
     }
@@ -226,7 +233,7 @@ void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData, bool compressed
     bleGamepad.releaseStart();
     pressSelect(false);
     bleGamepad.release(BUTTON_1);
-    bleGamepad.release(BUTTON_4);
+    bleGamepad.release(B_BUTTON);
 
     // Set new outputs
     if(oddframe)          // If on an odd case, use Select and Buttons 1-5
@@ -259,7 +266,7 @@ void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData, bool compressed
         else if (btn == 4 or btn == 10)
           bleGamepad.press(BUTTON_1);
         else if (btn == 5 or btn == 11)
-          bleGamepad.press(BUTTON_4);
+          bleGamepad.press(B_BUTTON);
 
         if(DEBUG)
         {
@@ -296,14 +303,14 @@ void outputZapper(uint8_t zapperData, uint8_t prevPadData)
   if(zapperData != prevPadData) // If state changed
   {
     if(zapperData % 2 == 1) // LIGHT
-      outputDirect(true,4);
+      outputDirect(true,B_BUTTON);
     else
-      outputDirect(false,4);
+      outputDirect(false,B_BUTTON);
 
     if(zapperData > 1) // TRIGG
-      outputDirect(true,1);
+      outputDirect(true,BUTTON_1);
     else
-      outputDirect(false,1);
+      outputDirect(false,BUTTON_1);
 
     bleGamepad.sendReport();
   }
