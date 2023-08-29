@@ -15,8 +15,9 @@ enum padTypes // Defines the supported types of NES controller input
 const padTypes forceMode = noPad; // Force a given pad mode, Auto detect if noPad selected
 const bool compressPowerpad = true; // Compress the powerpad buttons into the NES gamepad buttons, for use with custom ROMs
 const bool emulatorMapping = true; // Remap Select for use with on cosnole emulators
-const bool DEBUG = true; // Enable for serial monitor priority debug outputs
+const bool DEBUG = false; // Enable for serial monitor priority debug outputs
 const bool DEBUG_ADV = false; // Enable for serial monitor advanced debug outputs
+const bool OUTPUT_TEST = false; // Enable for serial monitor advanced debug outputs
 const uint16_t triggerPeriod = 100;   // Trigger debounce & reset time (ms)
 const uint16_t lightPeriod = 20;      // Light sensor input debounce time (ms)
 const uint8_t PowerPadBtnMap [12] = {1, 0, 4, 8, 5, 9, 10, 6, 3, 2, 11, 7};

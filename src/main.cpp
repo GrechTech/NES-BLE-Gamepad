@@ -28,7 +28,11 @@ void setup()
     Serial.println("### Setup Start");
   }
 
-  if(forceMode == noPad)
+  if(OUTPUT_TEST)
+  {
+    currentType = powerPad;
+  }
+  else if(forceMode == noPad)
   {
     if (DEBUG)
       Serial.print("### Auto Detect Start");
@@ -67,7 +71,8 @@ void setup()
     case powerPad: // Setup powerpad
       if (DEBUG)
         Serial.println("### Start Setup Power Pad");
-      setupShiftReg();
+      if (!OUTPUT_TEST)
+        setupShiftReg();
       setupBluetooth();
       tOut.setInterval(16 * TASK_MILLISECOND);
 
@@ -92,16 +97,35 @@ void setup()
     Serial.println("### Setup Done");
 }
 
-inline void TestSequence()
+unsigned int outputCount = 0;
+
+inline uint16_t TestSequence()
 {
-  
+  const uint8_t period = 120; // ~ two seconds
+  for(int n = 0; n < 16; n++)
+  {
+    if(outputCount >  period * n && outputCount <= period * (n + 1) )
+    {
+      gamepadData = pow(2, n) ;
+      if(DEBUG)
+      {
+        Serial.print("Count: ");Serial.print(outputCount);
+        Serial.print(" unit: ");Serial.print(n);
+        Serial.println(" Data: ");Serial.print(gamepadData, BIN);
+      }
+    }
+    outputCount++;
+  }
+  return gamepadData;
 }
 
 void inputLoop()
 {
   if (connected())
   {
-    if(currentType == gamePad)
+    if(OUTPUT_TEST)
+      gamepadData = TestSequence();
+    else if(currentType == gamePad)
       gamepadData = readShiftReg(false); // Get state
     else if(currentType == powerPad)
       gamepadData = readShiftReg(true); // Get state
