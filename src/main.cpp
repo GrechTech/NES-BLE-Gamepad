@@ -10,7 +10,6 @@ volatile uint16_t prevPadData = 65535;   // Previous state of game/power pad sta
 void inputLoop(); // Inputs loop (Read pins)
 void outputLoop(); // Outputs loop (Update BT)
 
-
 Scheduler ts; //Task Scheduluer
 
 //Tasks
@@ -52,16 +51,10 @@ void setup()
 
   switch(currentType)
   {
-    case noPad:
-      if (DEBUG)
-        Serial.println("### No controller detected");
-      break;
-
     case gamePad: // Setup gamepad
       if (DEBUG)
         Serial.println("### Start Setup Game Pad");
       setupShiftReg();
-      setupBluetooth();
       tOut.setInterval(2 * TASK_MILLISECOND); // 500 Hz
       if (DEBUG)
         Serial.println("#### Done Setup Game Pad");
@@ -71,7 +64,6 @@ void setup()
       if (DEBUG)
         Serial.println("### Start Setup Power Pad");
       setupShiftReg();
-      setupBluetooth();
       tOut.setInterval(16 * TASK_MILLISECOND); // 60 Hz
       if (DEBUG)
         Serial.println("#### Done Setup Power Pad");
@@ -83,14 +75,16 @@ void setup()
       pinMode(LIGHT_PIN, INPUT_PULLUP);
       pinMode(TRIGG_PIN, INPUT_PULLUP); // Tomee Zapp has a simple switch NC to GND. 
       // When trigger pulled, switch disconnected from GND allowing it to be pulled up
-      setupBluetooth();
+      
       tOut.setInterval(2 * TASK_MILLISECOND); // 500 Hz
       if (DEBUG)
         Serial.println("#### Done Setup Zapper Pad");
       break;
   }
 
+  setupBluetooth();
   tOut.enable(); // Start output loop
+
   if (DEBUG)
     Serial.println("### Setup Done");
 }
