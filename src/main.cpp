@@ -92,6 +92,11 @@ void setup()
     Serial.println("### Setup Done");
 }
 
+inline void TestSequence()
+{
+  
+}
+
 void inputLoop()
 {
   if (connected())

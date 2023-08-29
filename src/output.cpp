@@ -240,12 +240,12 @@ inline void CompressPowerpad(uint8_t btn)
   if (DEBUG)
   {
     Serial.print("# BTN: ");
-    Serial.print(btn);
+    Serial.print(btn + 1);
     Serial.println(" Pressed");
   }
 }
 
-void outputPowerpad(uint8_t powerpadData, uint8_t prevPadData, bool compressed) // Output using powerpad value data
+void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData, bool compressed) // Output using powerpad value data
 {
   if(compressed)
   {
