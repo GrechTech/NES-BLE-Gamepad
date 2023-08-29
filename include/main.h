@@ -20,7 +20,6 @@ const bool DEBUG_ADV = false; // Enable for serial monitor advanced debug output
 const bool OUTPUT_TEST = false; // Enable for serial monitor advanced debug outputs
 const uint16_t triggerPeriod = 100;   // Trigger debounce & reset time (ms)
 const uint16_t lightPeriod = 20;      // Light sensor input debounce time (ms)
-const uint8_t PowerPadBtnMap [12] = {1, 0, 4, 8, 5, 9, 10, 6, 3, 2, 11, 7};
 
 // ENUMERATIONS
 enum pins // ESP32 Pin Labels
@@ -38,18 +37,18 @@ enum pins // ESP32 Pin Labels
 
 // PROTOTYPES
 // INPUT
-void setupShiftReg();
-padTypes detectType();
+void setupShiftReg(void);
+padTypes detectType(void);
 uint16_t readShiftReg(bool powerpad);
-uint16_t readZapper();
+uint16_t readZapper(void);
 
 // OUTPUT
 void setupBluetooth(void);
 bool connected(void);
-void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData, bool compressed);
+void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData);
 void outputGamepad(uint8_t gamepadData, uint8_t prevPadData);
 void outputZapper(uint8_t zapperData, uint8_t prevPadData);
 
 // TEST
-uint16_t TestSequence();
+uint16_t TestSequence(void);
 #endif

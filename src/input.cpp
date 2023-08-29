@@ -97,9 +97,7 @@ void setupShiftReg() // Setup pins to read 4021 shift register(s)
   digitalWrite(CLOCK_PIN,HIGH);
 
   if (DEBUG)
-  {
     Serial.println("##### Done Setup Latch");
-  }
 }
 
 uint16_t readShiftReg(bool powerpad) // read 4021 shift register(s)
@@ -144,9 +142,6 @@ uint16_t readShiftReg(bool powerpad) // read 4021 shift register(s)
     delayMicroseconds(4);
     digitalWrite(CLOCK_PIN, LOW);
     delayMicroseconds(2);
-
-    if (DEBUG_ADV)
-      Serial.print(c);
   }
 
   if (DEBUG_ADV)
@@ -161,25 +156,10 @@ uint16_t readShiftReg(bool powerpad) // read 4021 shift register(s)
   }
 
   if(powerpad)
-  {
+    return ((256U * (uint16_t)powerpadData1) + (uint16_t)powerpadData2) >> 4; 
     // Combine two (8-bit unsigned) bytes into one 16-bit unsigned integer
-    uint16_t powerpadData = ((256U * (uint16_t)powerpadData1) + (uint16_t)powerpadData2) >> 4;
-    if (DEBUG_ADV)
-    {
-      Serial.print("PP: ");
-      Serial.println(powerpadData, BIN);
-    }
-    return powerpadData;
-  }
   else
-  {
-    if (DEBUG_ADV)
-    {
-      Serial.print("GP: ");
-      Serial.println((uint16_t)gamepadData, BIN);
-    }
     return (uint16_t)gamepadData;
-  }
 }
 
 uint16_t readZapper()

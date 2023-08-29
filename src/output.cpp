@@ -1,12 +1,15 @@
 #include "main.h"
 #include <BleGamepad.h> // https://github.com/lemmingDev/ESP32-BLE-Gamepad
 
+// Remap shift register value to PowerPad label
+const uint8_t PowerPadBtnMap [12] = {1, 0, 4, 8, 5, 9, 10, 6, 3, 2, 11, 7};
+
 // DYNAMIC
 BleGamepad bleGamepad("NES Controller", "GrechTech", 100); // Initialise Bluetooth gamepad
-BleGamepadConfiguration bleGamepadConfig;     // Sstore all of the Bluetooth options
-bool oddframe = false;
-uint8_t B_BUTTON = BUTTON_2;
-uint8_t SELECT = BUTTON_5; // alternate Select mapping for emulator mode
+BleGamepadConfiguration bleGamepadConfig;     // Store all of the Bluetooth options
+uint8_t B_BUTTON = BUTTON_2;// B button mapping, altered by emulator mode
+uint8_t SELECT = BUTTON_5;  // Alternate Select mapping for emulator mode
+bool oddframe = false;      // For alternating outputs in compressed powerpad mode
 
 // SETUP BASE FUNCTIONS
 void setupBluetooth() // Setup the Bluetooth gamepad service
@@ -31,7 +34,8 @@ void setupBluetooth() // Setup the Bluetooth gamepad service
     B_BUTTON = BUTTON_2;
 
   bleGamepadConfig.setIncludeStart(true);
-  bleGamepadConfig.setIncludeSelect(true);
+  if(!emulatorMapping)
+    bleGamepadConfig.setIncludeSelect(true);
   
   bleGamepadConfig.setAutoReport(false); // Manually handle reports, for performance
 
@@ -220,9 +224,9 @@ void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gam
   }
 }
 
-void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData, bool compressed) // Output using powerpad value data
+void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData) // Output using powerpad value data
 {
-  if(compressed) // If using the compressed scheme for NESLCD ROM patches
+  if(compressPowerpad) // If using the compressed scheme for NESLCD ROM patches
   {
     oddframe = !oddframe; // Invert the boolean on each call
     uint8_t startVal = 0;
