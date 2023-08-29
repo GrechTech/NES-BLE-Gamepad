@@ -61,7 +61,7 @@ void setup()
         Serial.println("### Start Setup Game Pad");
       setupShiftReg();
       setupBluetooth();
-      tOut.setInterval(1 * TASK_MILLISECOND);
+      tOut.setInterval(2 * TASK_MILLISECOND);
 
       if (DEBUG)
         Serial.println("#### Done Setup Game Pad");
@@ -83,7 +83,7 @@ void setup()
       pinMode(TRIGG_PIN, INPUT_PULLUP); // Tomee Zapp has a simple switch NC to GND. 
       // When trigger pulled, switch disconnected from GND allowing it to be pulled up
       setupBluetooth();
-      tOut.setInterval(1 * TASK_MILLISECOND);
+      tOut.setInterval(2 * TASK_MILLISECOND);
       
       if (DEBUG)
         Serial.println("#### Done Setup Zapper Pad");
@@ -123,8 +123,7 @@ void outputLoop()
     else if(currentType == zapperPad)
       outputZapper(gamepadData, prevPadData);
 
-    if(gamepadData != prevPadData) // If state changed
-      prevPadData = gamepadData;
+    prevPadData = gamepadData;
   }
 }
 

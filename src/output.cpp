@@ -262,15 +262,17 @@ void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData, bool compressed
 
     for(int n = startVal; n < endVal; n++)
     {
-      if((bitRead(powerpadData, 11 - n) == LOW)) // Inverted
+      if(bitRead(powerpadData, 11 - n) == LOW) // Inverted
       {
         CompressPowerpad(PowerPadBtnMap[n]);
-        
-        if(DEBUG && (bitRead(prevPadData, 11 - n) == HIGH))
+
+        if(DEBUG)
         {
           Serial.print("# BTN: ");
           Serial.print(PowerPadBtnMap[n] + 1);
-          Serial.println(" Pressed");
+          Serial.print(" ( ");
+          Serial.print(12 - n);
+          Serial.println(" ) Pressed");
         }
       }
     }
