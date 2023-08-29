@@ -50,4 +50,6 @@ void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData, bool compressed
 void outputGamepad(uint8_t gamepadData, uint8_t prevPadData);
 void outputZapper(uint8_t zapperData, uint8_t prevPadData);
 
+// TEST
+uint16_t TestSequence();
 #endif

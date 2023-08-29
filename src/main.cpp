@@ -15,7 +15,7 @@ Scheduler ts; //Task Scheduluer
 
 //Tasks
 Task tIn  ( 2 * TASK_MILLISECOND, TASK_FOREVER , &inputLoop,  &ts, true );
-Task tOut ( 2 * TASK_MILLISECOND, TASK_FOREVER , &outputLoop, &ts, true );
+Task tOut ( 2 * TASK_MILLISECOND, TASK_FOREVER , &outputLoop, &ts, false );
 
 // MAIN
 void setup()
@@ -29,9 +29,7 @@ void setup()
   }
 
   if(OUTPUT_TEST)
-  {
     currentType = powerPad;
-  }
   else if(forceMode == noPad)
   {
     if (DEBUG)
@@ -71,8 +69,7 @@ void setup()
     case powerPad: // Setup powerpad
       if (DEBUG)
         Serial.println("### Start Setup Power Pad");
-      if (!OUTPUT_TEST)
-        setupShiftReg();
+      setupShiftReg();
       setupBluetooth();
       tOut.setInterval(16 * TASK_MILLISECOND);
 
@@ -87,37 +84,18 @@ void setup()
       // When trigger pulled, switch disconnected from GND allowing it to be pulled up
       setupBluetooth();
       tOut.setInterval(1 * TASK_MILLISECOND);
-
+      
       if (DEBUG)
         Serial.println("#### Done Setup Zapper Pad");
       break;
   }
 
+  tOut.enable();
   if (DEBUG)
     Serial.println("### Setup Done");
 }
 
-unsigned int outputCount = 0;
 
-inline uint16_t TestSequence()
-{
-  const uint8_t period = 120; // ~ two seconds
-  for(int n = 0; n < 16; n++)
-  {
-    if(outputCount >  period * n && outputCount <= period * (n + 1) )
-    {
-      gamepadData = pow(2, n) ;
-      if(DEBUG)
-      {
-        Serial.print("Count: ");Serial.print(outputCount);
-        Serial.print(" unit: ");Serial.print(n);
-        Serial.println(" Data: ");Serial.print(gamepadData, BIN);
-      }
-    }
-    outputCount++;
-  }
-  return gamepadData;
-}
 
 void inputLoop()
 {
