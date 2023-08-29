@@ -3,19 +3,19 @@
 
 // REGISTERS
 padTypes currentType = noPad; // Stores the current pad type
-volatile uint16_t gamepadData = 65535;   // Previous state of game/power pad state
+volatile uint16_t gamepadData = 65535;   // Current state of game/power pad state
 volatile uint16_t prevPadData = 65535;   // Previous state of game/power pad state
 
 // Task prototypes
-void inputLoop();
-void outputLoop();
+void inputLoop(); // Inputs loop (Read pins)
+void outputLoop(); // Outputs loop (Update BT)
 
 
 Scheduler ts; //Task Scheduluer
 
 //Tasks
-Task tIn  ( 2 * TASK_MILLISECOND, TASK_FOREVER , &inputLoop,  &ts, true );
-Task tOut ( 2 * TASK_MILLISECOND, TASK_FOREVER , &outputLoop, &ts, false );
+Task tIn  ( 2 * TASK_MILLISECOND, TASK_FOREVER , &inputLoop,  &ts, true ); // Inputs
+Task tOut ( 2 * TASK_MILLISECOND, TASK_FOREVER , &outputLoop, &ts, false ); // Outputs
 
 // MAIN
 void setup()
@@ -90,7 +90,7 @@ void setup()
       break;
   }
 
-  tOut.enable();
+  tOut.enable(); // Start output loop
   if (DEBUG)
     Serial.println("### Setup Done");
 }
