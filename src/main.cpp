@@ -56,26 +56,27 @@ void setup()
       if (DEBUG)
         Serial.println("### No controller detected");
       break;
+
     case gamePad: // Setup gamepad
       if (DEBUG)
         Serial.println("### Start Setup Game Pad");
       setupShiftReg();
       setupBluetooth();
       tOut.setInterval(2 * TASK_MILLISECOND);
-
       if (DEBUG)
         Serial.println("#### Done Setup Game Pad");
       break;
+
     case powerPad: // Setup powerpad
       if (DEBUG)
         Serial.println("### Start Setup Power Pad");
       setupShiftReg();
       setupBluetooth();
       tOut.setInterval(16 * TASK_MILLISECOND);
-
       if (DEBUG)
         Serial.println("#### Done Setup Power Pad");
       break;
+
     case zapperPad: // Setup zapper
       if (DEBUG)
         Serial.println("### Start Setup Zapper");
@@ -84,7 +85,6 @@ void setup()
       // When trigger pulled, switch disconnected from GND allowing it to be pulled up
       setupBluetooth();
       tOut.setInterval(2 * TASK_MILLISECOND);
-      
       if (DEBUG)
         Serial.println("#### Done Setup Zapper Pad");
       break;
@@ -95,8 +95,7 @@ void setup()
     Serial.println("### Setup Done");
 }
 
-
-
+// Main
 void inputLoop()
 {
   if (connected())

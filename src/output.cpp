@@ -57,18 +57,18 @@ inline void outputDirect(bool press, uint8_t input) // Output a button directly
   }
 }
 
-inline void pressSelect(bool input)
+inline void pressSelect(bool input) // Press the select button
 {
   if(input)
   {
-    if(emulatorMapping)
+    if(emulatorMapping) // If using mapping for NES emulator on EverDrive
       bleGamepad.press(BUTTON_5);
     else
       bleGamepad.pressSelect();
   }
   else
   {
-    if(emulatorMapping)
+    if(emulatorMapping) // If using mapping for NES emulator on EverDrive
       bleGamepad.release(BUTTON_5);
     else
       bleGamepad.releaseSelect();
@@ -213,63 +213,58 @@ void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gam
   }
 }
 
-inline void resetAll()
+void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData, bool compressed) // Output using powerpad value data
 {
+  if(compressed) // If using the compressed scheme for NESLCD ROM patches
+  {
+    oddframe = !oddframe; // Invert the boolean on each call
+    uint8_t startVal = 0;
+    uint8_t endVal = 0;
+
+    // Reset output values
     bleGamepad.setHat(HAT_CENTERED);
     bleGamepad.releaseStart();
     pressSelect(false);
     bleGamepad.release(BUTTON_1);
     bleGamepad.release(BUTTON_4);
-}
 
-inline void CompressPowerpad(uint8_t btn)
-{
-  if (btn == 0 or btn == 6)
-    bleGamepad.setHat(HAT_UP); 
-  else if (btn == 1 or btn == 7)
-    bleGamepad.setHat(HAT_RIGHT);
-  else if (btn == 2 or btn == 8)
-    bleGamepad.setHat(HAT_DOWN);
-  else if (btn == 3 or btn == 9)
-    bleGamepad.setHat(HAT_LEFT);
-  else if (btn == 4 or btn == 10)
-    bleGamepad.press(BUTTON_1);
-  else if (btn == 5 or btn == 11)
-    bleGamepad.press(BUTTON_4);
-}
-
-void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData, bool compressed) // Output using powerpad value data
-{
-  if(compressed)
-  {
-    oddframe = !oddframe; // Invert the boolean on each call
-    uint8_t startVal = 0;
-    uint8_t endVal = 0;
+    // Set new outputs
     if(oddframe)          // If on an odd case, use Select and Buttons 1-5
     {
-      resetAll();
       pressSelect(true);
       startVal = 0;
       endVal = 6;
     }
     else          // If on an even case, use Start and Buttons 6-12
     {
-      resetAll();
       bleGamepad.pressStart();
       startVal = 6;
       endVal = 12;
     }
 
-    for(int n = startVal; n < endVal; n++)
+    for(uint8_t n = startVal; n < endVal; n++)
     {
       if(bitRead(powerpadData, 11 - n) == LOW) // Inverted
       {
-        CompressPowerpad(PowerPadBtnMap[n]);
+        // the compressed scheme for NESLCD ROM patches
+        uint8_t btn = PowerPadBtnMap[n];
+        if (btn == 0 or btn == 6)
+          bleGamepad.setHat(HAT_UP); 
+        else if (btn == 1 or btn == 7)
+          bleGamepad.setHat(HAT_RIGHT);
+        else if (btn == 2 or btn == 8)
+          bleGamepad.setHat(HAT_DOWN);
+        else if (btn == 3 or btn == 9)
+          bleGamepad.setHat(HAT_LEFT);
+        else if (btn == 4 or btn == 10)
+          bleGamepad.press(BUTTON_1);
+        else if (btn == 5 or btn == 11)
+          bleGamepad.press(BUTTON_4);
 
         if(DEBUG)
         {
           Serial.print("# BTN: ");
-          Serial.print(PowerPadBtnMap[n] + 1);
+          Serial.print(btn + 1);
           Serial.print(" ( ");
           Serial.print(12 - n);
           Serial.println(" ) Pressed");
@@ -279,7 +274,7 @@ void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData, bool compressed
 
     bleGamepad.sendReport();
   }
-  else
+  else //If using uncompressed scheme across all 12 buttons)
   {
     if(powerpadData != prevPadData) // If state changed
     {

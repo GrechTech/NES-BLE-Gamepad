@@ -6,6 +6,7 @@ bool prevLightData = true;      // Previous state of Zapper light sensor
 unsigned long triggerTime = 0;  // Time of last trigger pull
 unsigned long lightTime = 0;    // Time of last light sense
 
+// Detect what is connected to the controller port, supports gamepad, powerpad or zapper
 padTypes detectType()
 {
   bool gamepadIndicator = false;
