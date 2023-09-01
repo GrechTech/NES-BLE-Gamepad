@@ -38,6 +38,15 @@ enum pins // ESP32 Pin Labels
   LATCH_PIN = 23,       //  PowerPad or Normal Pad only
 };
 
+// Debug macro
+inline void DebugOut(const char* msg,const bool ln = true)
+{
+  if(ln)
+    Serial.println(msg);
+  else
+    Serial.print(msg);
+}
+
 // PROTOTYPES
 // INPUT
 void setupShiftReg(void);           // Setup pins to read 4021 shift register(s)

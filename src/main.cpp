@@ -21,74 +21,59 @@ void setup()
   currentType = FORCE_MODE; // Represents the type of NES accessory
 
   if (DEBUG)
-  {
     Serial.begin(115200);
-    Serial.println("### Setup Start");
-  }
+  DebugOut("### Setup Start");
+
 
   if(OUTPUT_TEST)
     currentType = powerPad;
   else if(FORCE_MODE == noPad)
   {
-    if (DEBUG)
-      Serial.print("### Auto Detect Start");
+    DebugOut("### Auto Detect Start");
 
     while (currentType == noPad)
     {
       currentType = detectType();
-
-      if (DEBUG)
-        Serial.print('.');
+      DebugOut(".", false);
     } 
 
-    if (DEBUG)
-    {
-      Serial.println();
-      Serial.println("### Auto Detect Complete");
-    }
+    DebugOut("### Auto Detect Complete");
   }
 
   switch(currentType)
   {
     case gamePad: // Setup gamepad
-      if (DEBUG)
-        Serial.println("### Start Setup Game Pad");
+      DebugOut("### Start Setup Game Pad");
       setupShiftReg();
       tOut.setInterval(2 * TASK_MILLISECOND); // 500 Hz
-      if (DEBUG)
-        Serial.println("#### Done Setup Game Pad");
+      DebugOut("#### Done Setup Game Pad");
       break;
 
     case powerPad: // Setup powerpad
-      if (DEBUG)
-        Serial.println("### Start Setup Power Pad");
+      DebugOut("### Start Setup Power Pad");
       setupShiftReg();
       if(COMPRESS_POWERPAD)
         tOut.setInterval(COMPRESS_SPEED * TASK_MILLISECOND); // 60 Hz
       else
         tOut.setInterval(16 * TASK_MILLISECOND); // 60 Hz
-      if (DEBUG)
-        Serial.println("#### Done Setup Power Pad");
+      DebugOut("#### Done Setup Power Pad");
       break;
 
     case zapperPad: // Setup zapper
-      if (DEBUG)
-        Serial.println("### Start Setup Zapper");
+      DebugOut("### Start Setup Zapper");
       pinMode(LIGHT_PIN, INPUT_PULLUP);
       pinMode(TRIGG_PIN, INPUT_PULLUP); // Tomee Zapp has a simple switch NC to GND. 
       // When trigger pulled, switch disconnected from GND allowing it to be pulled up
       
       tOut.setInterval(2 * TASK_MILLISECOND); // 500 Hz
-      if (DEBUG)
-        Serial.println("#### Done Setup Zapper Pad");
+      DebugOut("#### Done Setup Zapper Pad");
       break;
   }
 
   setupBluetooth();
   tOut.enable(); // Start output loop
 
-  if (DEBUG)
-    Serial.println("### Setup Done");
+  DebugOut("### Setup Done");
 }
 
 // Main

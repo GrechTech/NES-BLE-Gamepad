@@ -13,11 +13,9 @@ padTypes detectType()
   if(digitalRead(GAMEPAD_PIN))
   {
     gamepadIndicator = true;
-    if (DEBUG)
-      Serial.println("#### Game Pad Indicated");
+    DebugOut("#### Game Pad Indicated");
   }
-  if(DEBUG)
-     Serial.println("Gamepad pin (18) state (Pulled down): " + digitalRead(GAMEPAD_PIN));
+  DebugOut("Gamepad pin (18) state (Pulled down): " + digitalRead(GAMEPAD_PIN));
   pinMode(GAMEPAD_PIN, INPUT);
 
   // Power Pad Check
@@ -27,8 +25,7 @@ padTypes detectType()
   if(digitalRead(POWERPAD1_PIN) || digitalRead(POWERPAD2_PIN))
   {
     powerpadIndicator = true;
-    if (DEBUG)
-      Serial.println("#### Power Pad Indicated");
+    DebugOut("#### Power Pad Indicated");
   }
   if(DEBUG)
      Serial.println("Powerpad pin (21 & 19) states (Pulled up): " + digitalRead(POWERPAD1_PIN) + digitalRead(POWERPAD2_PIN));
@@ -38,11 +35,9 @@ padTypes detectType()
   if(!digitalRead(TRIGG_PIN))
   {
     zapperIndicator = true;
-    if (DEBUG)
-      Serial.println("#### Zapper Indicated");
+    DebugOut("#### Zapper Indicated");
   }  
-  if(DEBUG)
-     Serial.println("Gamepad pin (19) state (Pulled down - Seeking inverse): " + digitalRead(TRIGG_PIN));
+  DebugOut("Gamepad pin (19) state (Pulled down - Seeking inverse): " + digitalRead(TRIGG_PIN));
   pinMode(TRIGG_PIN, INPUT);  
 
   if(DEBUG)
@@ -50,29 +45,25 @@ padTypes detectType()
   // Decide
   if(gamepadIndicator) // Game Pad Pin only active with gamepad
   {
-    if (DEBUG)
-      Serial.println("#### Game Pad Mode");
+    DebugOut("#### Game Pad Mode");
     
     return gamePad;
   }  
   else if(!gamepadIndicator && powerpadIndicator && !zapperIndicator)
   {
-    if (DEBUG)
-      Serial.println("#### Power Pad Mode");
+    DebugOut("#### Power Pad Mode");
 
     return powerPad;
   }  
   else if(!gamepadIndicator && !powerpadIndicator && zapperIndicator)
   {
-    if (DEBUG)
-      Serial.println("#### Zapper Mode");
+    DebugOut("#### Zapper Mode");
     
     return zapperPad;
   }  
   else
   {
-    if (DEBUG)
-      Serial.println("#### Detection Failed");
+    DebugOut("#### Detection Failed");
     
     return noPad;
   }  
@@ -90,8 +81,7 @@ void setupShiftReg() // Setup pins to read 4021 shift register(s)
   digitalWrite(LATCH_PIN,HIGH);
   digitalWrite(CLOCK_PIN,HIGH);
 
-  if (DEBUG)
-    Serial.println("##### Done Setup Latch");
+  DebugOut("##### Done Setup Latch");
 }
 
 inline uint16_t readShiftReg(bool powerpad) // read 4021 shift register(s)
@@ -172,8 +162,7 @@ inline uint16_t readZapper() // Read the zapper light and trigger pins
     prevLightData = true;
     changed = true;
     lightTime = millis();
-    if (DEBUG)
-      Serial.println("Light On (Inverted)");
+    DebugOut("Light On (Inverted)");
     
     data = 1;
   }
@@ -181,8 +170,7 @@ inline uint16_t readZapper() // Read the zapper light and trigger pins
   {
     prevLightData = false;
     changed = true;
-    if (DEBUG)
-      Serial.println("Light Off (Inverted)");
+    DebugOut("Light Off (Inverted)");
   }
 
   if(digitalRead(TRIGG_PIN) && !prevTriggData)
@@ -191,8 +179,7 @@ inline uint16_t readZapper() // Read the zapper light and trigger pins
     prevTriggResetData = false;
     changed = true;
     triggerTime = millis();
-    if (DEBUG)
-      Serial.println("Trigger On");    
+    DebugOut("Trigger On");    
 
     data += 2;
   }
@@ -201,16 +188,14 @@ inline uint16_t readZapper() // Read the zapper light and trigger pins
     prevTriggData = true;
     prevTriggResetData = true;
     changed = true;
-    if (DEBUG)
-      Serial.println("Trigger Release");
+    DebugOut("Trigger Release");
   }
   else if(!digitalRead(TRIGG_PIN) && prevTriggData && (millis() - triggerTime > TRIGGER_PERIOD))
   {
     prevTriggData = false;
     prevTriggResetData = false;
     changed = true;
-    if (DEBUG)
-      Serial.println("Trigger Off");
+    DebugOut("Trigger Off");
   }
 
   return data;
