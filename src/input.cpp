@@ -162,7 +162,7 @@ uint16_t readShiftReg(bool powerpad) // read 4021 shift register(s)
     return (uint16_t)gamepadData;
 }
 
-uint16_t readZapper()
+uint16_t readZapper() // Read the zapper light and trigger pins
 {
   bool changed = false;
   uint16_t data = 0;

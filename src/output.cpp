@@ -7,11 +7,15 @@ const uint8_t PowerPadBtnMap [12] = {1, 0, 4, 8, 5, 9, 10, 6, 3, 2, 11, 7};
 // DYNAMIC
 BleGamepad bleGamepad("NES Controller", "GrechTech", 100); // Initialise Bluetooth gamepad
 BleGamepadConfiguration bleGamepadConfig;     // Store all of the Bluetooth options
-uint8_t B_BUTTON = BUTTON_2;// B button mapping, altered by emulator mode
-uint8_t SELECT = BUTTON_5;  // Alternate Select mapping for emulator mode
-bool oddframe = false;      // For alternating outputs in compressed powerpad mode
+bool frameFlag = false;       // For alternating outputs in compressed powerpad mode
+uint8_t B_BUTTON = BUTTON_2;  // B button mapping, altered by emulator mode
+uint8_t SELECT = BUTTON_5;    // Alternate Select mapping for emulator mode
 
-// SETUP BASE FUNCTIONS
+bool connected() // Check if Bluetooth connected
+{
+  return bleGamepad.isConnected();
+}
+
 void setupBluetooth() // Setup the Bluetooth gamepad service
 {
   bleGamepad.deviceName = "NES BLE Gamepad";
@@ -43,11 +47,6 @@ void setupBluetooth() // Setup the Bluetooth gamepad service
 
   if (DEBUG)
     Serial.println("##### Done Setup BLE");
-}
-
-bool connected() // Check if Bluetooth connected
-{
-  return bleGamepad.isConnected();
 }
 
 inline void outputDirect(bool press, uint8_t input) // Output a button directly
@@ -227,7 +226,7 @@ void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData) // Output using
 {
   if(COMPRESS_POWERPAD) // If using the compressed scheme for NESLCD ROM patches
   {
-    oddframe = !oddframe; // Invert the boolean on each call
+    frameFlag = !frameFlag; // Invert the boolean on each call
     uint8_t startVal = 0;
     uint8_t endVal = 0;
 
@@ -239,7 +238,7 @@ void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData) // Output using
     bleGamepad.release(B_BUTTON);
 
     // Set new outputs
-    if(oddframe)          // If on an odd case, use Select and Buttons 1-5
+    if(frameFlag)          // If on an odd case, use Select and Buttons 1-5
     {
       pressSelect(true);
       startVal = 0;
@@ -301,7 +300,7 @@ void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData) // Output using
   }
 }
 
-void outputZapper(uint8_t zapperData, uint8_t prevPadData)
+void outputZapper(uint8_t zapperData, uint8_t prevPadData) // Output using zapper data
 {    
   if(zapperData != prevPadData) // If state changed
   {
