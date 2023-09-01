@@ -177,7 +177,7 @@ uint16_t readZapper()
     
     data = 1;
   }
-  else if(!digitalRead(LIGHT_PIN) && prevLightData && (millis() - lightTime > lightPeriod)) 
+  else if(!digitalRead(LIGHT_PIN) && prevLightData && (millis() - lightTime > LIGHT_PERIOD)) 
   {
     prevLightData = false;
     changed = true;
@@ -196,7 +196,7 @@ uint16_t readZapper()
 
     data += 2;
   }
-  else if(digitalRead(TRIGG_PIN) && prevTriggData && !prevTriggResetData && (millis() - triggerTime > triggerPeriod))
+  else if(digitalRead(TRIGG_PIN) && prevTriggData && !prevTriggResetData && (millis() - triggerTime > TRIGGER_PERIOD))
   {
     prevTriggData = true;
     prevTriggResetData = true;
@@ -204,7 +204,7 @@ uint16_t readZapper()
     if (DEBUG)
       Serial.println("Trigger Release");
   }
-  else if(!digitalRead(TRIGG_PIN) && prevTriggData && (millis() - triggerTime > triggerPeriod))
+  else if(!digitalRead(TRIGG_PIN) && prevTriggData && (millis() - triggerTime > TRIGGER_PERIOD))
   {
     prevTriggData = false;
     prevTriggResetData = false;

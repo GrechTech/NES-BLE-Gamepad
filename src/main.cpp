@@ -19,7 +19,7 @@ Task tOut ( 2 * TASK_MILLISECOND, TASK_FOREVER , &outputLoop, &ts, false ); // O
 // MAIN
 void setup()
 {
-  currentType = forceMode; // Represents the type of NES accessory
+  currentType = FORCE_MODE; // Represents the type of NES accessory
 
   if (DEBUG)
   {
@@ -29,7 +29,7 @@ void setup()
 
   if(OUTPUT_TEST)
     currentType = powerPad;
-  else if(forceMode == noPad)
+  else if(FORCE_MODE == noPad)
   {
     if (DEBUG)
       Serial.print("### Auto Detect Start");
@@ -64,7 +64,10 @@ void setup()
       if (DEBUG)
         Serial.println("### Start Setup Power Pad");
       setupShiftReg();
-      tOut.setInterval(16 * TASK_MILLISECOND); // 60 Hz
+      if(COMPRESS_POWERPAD)
+        tOut.setInterval(COMPRESS_SPEED * TASK_MILLISECOND); // 60 Hz
+      else
+        tOut.setInterval(16 * TASK_MILLISECOND); // 60 Hz
       if (DEBUG)
         Serial.println("#### Done Setup Power Pad");
       break;
@@ -95,7 +98,7 @@ void inputLoop()
   if (connected())
   {
     if(OUTPUT_TEST)
-      gamepadData = TestSequence();
+      gamepadData = testSequence();
     else if(currentType == gamePad)
       gamepadData = readShiftReg(false); // Get state
     else if(currentType == powerPad)

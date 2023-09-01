@@ -5,7 +5,7 @@ unsigned int outputCount = 0;
 uint16_t prevData = 0;
 
 // Press every powerpad button, incrementing every 2 seconds
-uint16_t TestSequence()
+uint16_t testSequence()
 {
   uint16_t outputData = 0;
   

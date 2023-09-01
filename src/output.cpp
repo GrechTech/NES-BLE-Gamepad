@@ -23,18 +23,18 @@ void setupBluetooth() // Setup the Bluetooth gamepad service
   bleGamepadConfig.setIncludeSlider1(false);
   bleGamepadConfig.setIncludeSlider2(false);
 
-  if(compressPowerpad)
+  if(COMPRESS_POWERPAD)
     bleGamepadConfig.setButtonCount(6);  
   else
     bleGamepadConfig.setButtonCount(12);  
 
-  if(emulatorMapping)
+  if(EMULATOR_MAPPING)
     B_BUTTON = BUTTON_4;
   else
     B_BUTTON = BUTTON_2;
 
   bleGamepadConfig.setIncludeStart(true);
-  if(!emulatorMapping)
+  if(!EMULATOR_MAPPING)
     bleGamepadConfig.setIncludeSelect(true);
   
   bleGamepadConfig.setAutoReport(false); // Manually handle reports, for performance
@@ -72,14 +72,14 @@ inline void pressSelect(bool input) // Press the select button
 {
   if(input)
   {
-    if(emulatorMapping) // If using alternate Select mapping
+    if(EMULATOR_MAPPING) // If using alternate Select mapping
       bleGamepad.press(SELECT);
     else
       bleGamepad.pressSelect();
   }
   else
   {
-    if(emulatorMapping) // If using alternate Select mapping
+    if(EMULATOR_MAPPING) // If using alternate Select mapping
       bleGamepad.release(SELECT);
     else
       bleGamepad.releaseSelect();
@@ -151,7 +151,6 @@ void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gam
     {
       if (DEBUG)
         Serial.print("# DPAD: ");
-        
 
       if( (bitRead(gamepadData, 7 - 4) == LOW) && (bitRead(gamepadData, 7 - 5) == HIGH)
       && (bitRead(gamepadData, 7 - 6) == HIGH) && (bitRead(gamepadData, 7 - 7) == HIGH)) 
@@ -226,7 +225,7 @@ void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gam
 
 void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData) // Output using powerpad value data
 {
-  if(compressPowerpad) // If using the compressed scheme for NESLCD ROM patches
+  if(COMPRESS_POWERPAD) // If using the compressed scheme for NESLCD ROM patches
   {
     oddframe = !oddframe; // Invert the boolean on each call
     uint8_t startVal = 0;
