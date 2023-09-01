@@ -1,13 +1,13 @@
 #include "main.h"
 
 const uint16_t period = 1000; // ~ two seconds
-unsigned int outputCount = 0;
-uint16_t prevData = 0;
 
 // Press every powerpad button, incrementing every 2 seconds
 uint16_t testPowerpad()
 {
   uint16_t outputData = 0;
+  static uint16_t prevData = 0;
+  static unsigned int outputCount = 0;
   
   if(outputCount > period * 12)
     outputCount = 0;

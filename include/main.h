@@ -16,8 +16,10 @@ const padTypes FORCE_MODE = noPad; // Force a given pad mode, Auto detect if noP
 const uint16_t TRIGGER_PERIOD = 100;   // Trigger debounce & reset time (ms)
 const uint16_t LIGHT_PERIOD = 20;      // Light sensor input debounce time (ms)
 const uint8_t COMPRESS_SPEED = 16; // (ms) How often the powerpad output loop cycles in compression mode
+const uint8_t B_BUTTON_EMU_OFFSET = 2; // BUTTON_4 in emulator mode
 const bool COMPRESS_POWERPAD = false; // Compress the powerpad buttons into the NES gamepad buttons, for use with custom ROMs
 const bool EMULATOR_MAPPING = false; // Remap Select for use with on cosnole emulators
+// DEBUG CONFIG
 const bool DEBUG = false; // Enable for serial monitor priority debug outputs
 const bool DEBUG_ADV = false; // Enable for serial monitor advanced debug outputs
 const bool OUTPUT_TEST = false; // Enable for serial monitor advanced debug outputs
@@ -40,15 +42,12 @@ enum pins // ESP32 Pin Labels
 // INPUT
 void setupShiftReg(void);           // Setup pins to read 4021 shift register(s)
 padTypes detectType(void);          // Detect what is connected to the controller port
-uint16_t readShiftReg(bool powerpad);           // read 4021 shift register(s)
-uint16_t readZapper(void);          // Read the zapper light and trigger pins
+uint16_t input(padTypes currentType); // Return data for a given padType
 
 // OUTPUT
 bool connected(void); // Check if Bluetooth connected
 void setupBluetooth(void); // Setup the Bluetooth gamepad service
-void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData); // Output using powerpad value data
-void outputGamepad(uint8_t gamepadData, uint8_t prevPadData); // Output using gamepad value data
-void outputZapper(uint8_t zapperData, uint8_t prevPadData); // Output using zapper data
+void output(padTypes currentType, uint16_t gamepadData); // Send data for a given padType
 
 // TEST
 uint16_t testPowerpad(void); // Press every powerpad button, incrementing every 2 seconds

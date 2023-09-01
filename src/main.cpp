@@ -4,7 +4,6 @@
 // REGISTERS
 padTypes currentType = noPad; // Stores the current pad type
 volatile uint16_t gamepadData = 65535;   // Current state of game/power pad state
-volatile uint16_t prevPadData = 65535;   // Previous state of game/power pad state
 
 // Task prototypes
 void inputLoop(); // Inputs loop (Read pins)
@@ -96,31 +95,13 @@ void setup()
 void inputLoop()
 {
   if (connected())
-  {
-    if(OUTPUT_TEST)
-      gamepadData = testSequence();
-    else if(currentType == gamePad)
-      gamepadData = readShiftReg(false); // Get state
-    else if(currentType == powerPad)
-      gamepadData = readShiftReg(true); // Get state
-    else if(currentType == zapperPad)
-      gamepadData = readZapper();
-  }
+    gamepadData = input(currentType);
 }
 
 void outputLoop()
 {
   if (connected())
-  {
-    if(currentType == gamePad)
-      outputGamepad(gamepadData, prevPadData);
-    else if(currentType == powerPad)
-      outputPowerpad(gamepadData, prevPadData);
-    else if(currentType == zapperPad)
-      outputZapper(gamepadData, prevPadData);
-
-    prevPadData = gamepadData;
-  }
+    output(currentType, gamepadData);
 }
 
 void loop()

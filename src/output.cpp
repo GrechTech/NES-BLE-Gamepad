@@ -1,15 +1,12 @@
 #include "main.h"
 #include <BleGamepad.h> // https://github.com/lemmingDev/ESP32-BLE-Gamepad
 
-// Remap shift register value to PowerPad label
-const uint8_t PowerPadBtnMap [12] = {1, 0, 4, 8, 5, 9, 10, 6, 3, 2, 11, 7};
+const uint8_t PowerPadBtnMap [12] = {1, 0, 4, 8, 5, 9, 10, 6, 3, 2, 11, 7}; // Remap shift register value to PowerPad label
+const uint8_t SELECT = BUTTON_5;    // Alternate Select mapping for emulator mode
+const uint8_t B_BUTTON = BUTTON_2 + ((uint8_t)EMULATOR_MAPPING * B_BUTTON_EMU_OFFSET);  // B button mapping
 
-// DYNAMIC
 BleGamepad bleGamepad("NES Controller", "GrechTech", 100); // Initialise Bluetooth gamepad
 BleGamepadConfiguration bleGamepadConfig;     // Store all of the Bluetooth options
-bool frameFlag = false;       // For alternating outputs in compressed powerpad mode
-uint8_t B_BUTTON = BUTTON_2;  // B button mapping, altered by emulator mode
-uint8_t SELECT = BUTTON_5;    // Alternate Select mapping for emulator mode
 
 bool connected() // Check if Bluetooth connected
 {
@@ -28,14 +25,9 @@ void setupBluetooth() // Setup the Bluetooth gamepad service
   bleGamepadConfig.setIncludeSlider2(false);
 
   if(COMPRESS_POWERPAD)
-    bleGamepadConfig.setButtonCount(6);  
+    bleGamepadConfig.setButtonCount(6);  // Half buttons required with compressed scheme
   else
     bleGamepadConfig.setButtonCount(12);  
-
-  if(EMULATOR_MAPPING)
-    B_BUTTON = BUTTON_4;
-  else
-    B_BUTTON = BUTTON_2;
 
   bleGamepadConfig.setIncludeStart(true);
   if(!EMULATOR_MAPPING)
@@ -85,7 +77,7 @@ inline void pressSelect(bool input) // Press the select button
   }
 }
 
-void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gamepad value data
+inline void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gamepad value data
 {
   if(gamepadData != prevPadData) // If state changed
   {
@@ -222,8 +214,10 @@ void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output using gam
   }
 }
 
-void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData) // Output using powerpad value data
+inline void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData) // Output using powerpad value data
 {
+  static bool frameFlag = false;       // For alternating outputs in compressed powerpad mode
+
   if(COMPRESS_POWERPAD) // If using the compressed scheme for NESLCD ROM patches
   {
     frameFlag = !frameFlag; // Invert the boolean on each call
@@ -300,7 +294,7 @@ void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData) // Output using
   }
 }
 
-void outputZapper(uint8_t zapperData, uint8_t prevPadData) // Output using zapper data
+inline void outputZapper(uint8_t zapperData, uint8_t prevPadData) // Output using zapper data
 {    
   if(zapperData != prevPadData) // If state changed
   {
@@ -316,4 +310,18 @@ void outputZapper(uint8_t zapperData, uint8_t prevPadData) // Output using zappe
 
     bleGamepad.sendReport();
   }
+}
+
+void output(padTypes currentType, uint16_t gamepadData)
+{
+  static uint16_t prevPadData = 65535;   // Previous state of game/power pad state
+
+  if(currentType == gamePad)
+    outputGamepad(gamepadData, prevPadData);
+  else if(currentType == powerPad)
+    outputPowerpad(gamepadData, prevPadData);
+  else if(currentType == zapperPad)
+    outputZapper(gamepadData, prevPadData);
+
+  prevPadData = gamepadData;
 }

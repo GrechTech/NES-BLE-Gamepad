@@ -1,11 +1,5 @@
 #include "main.h"
 
-bool prevTriggData = false;     // Previous state of Zapper trigger
-bool prevTriggResetData = false;// Previous state of Zapper trigger reset
-bool prevLightData = true;      // Previous state of Zapper light sensor
-unsigned long triggerTime = 0;  // Time of last trigger pull
-unsigned long lightTime = 0;    // Time of last light sense
-
 // Detect what is connected to the controller port, supports gamepad, powerpad or zapper
 padTypes detectType()
 {
@@ -100,7 +94,7 @@ void setupShiftReg() // Setup pins to read 4021 shift register(s)
     Serial.println("##### Done Setup Latch");
 }
 
-uint16_t readShiftReg(bool powerpad) // read 4021 shift register(s)
+inline uint16_t readShiftReg(bool powerpad) // read 4021 shift register(s)
 {
   // Setup local registers for each input
   uint8_t gamepadData = 0; 
@@ -162,8 +156,14 @@ uint16_t readShiftReg(bool powerpad) // read 4021 shift register(s)
     return (uint16_t)gamepadData;
 }
 
-uint16_t readZapper() // Read the zapper light and trigger pins
+inline uint16_t readZapper() // Read the zapper light and trigger pins
 {
+  static bool prevTriggData = false;     // Previous state of Zapper trigger
+  static bool prevTriggResetData = false;// Previous state of Zapper trigger reset
+  static bool prevLightData = true;      // Previous state of Zapper light sensor
+  static unsigned long triggerTime = 0;  // Time of last trigger pull
+  static unsigned long lightTime = 0;    // Time of last light sense
+
   bool changed = false;
   uint16_t data = 0;
 
@@ -214,4 +214,18 @@ uint16_t readZapper() // Read the zapper light and trigger pins
   }
 
   return data;
+}
+
+uint16_t input(padTypes currentType)
+{
+  if(OUTPUT_TEST)
+    return testPowerpad();
+  else if(currentType == gamePad)
+    return readShiftReg(false); // Get state
+  else if(currentType == powerPad)
+    return readShiftReg(true); // Get state
+  else if(currentType == zapperPad)
+    return readZapper();
+  else
+    return 0;
 }
