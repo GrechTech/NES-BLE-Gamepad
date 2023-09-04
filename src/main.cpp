@@ -4,16 +4,19 @@
 // REGISTERS
 padTypes currentType = noPad; // Stores the current pad type
 volatile uint16_t gamepadData = 65535;   // Current state of game/power pad state
+bool Connected = false;
 
 // Task prototypes
 void inputLoop(); // Inputs loop (Read pins)
 void outputLoop(); // Outputs loop (Update BT)
+void connectLoop(); // Outputs loop (Update BT)
 
 Scheduler ts; //Task Scheduluer
 
 //Tasks
-Task tIn  ( 1 * TASK_MILLISECOND, TASK_FOREVER , &inputLoop,  &ts, true ); // Inputs
-Task tOut ( 1 * TASK_MILLISECOND, TASK_FOREVER , &outputLoop, &ts, false ); // Outputs
+Task tCon ( 1 * TASK_SECOND,      TASK_FOREVER, &connectLoop,   &ts, true); // Connections check
+Task tIn  ( 1 * TASK_MILLISECOND, TASK_FOREVER, &inputLoop,     &ts, Connected); // Inputs
+Task tOut ( 1 * TASK_MILLISECOND, TASK_FOREVER, &outputLoop,    &ts, Connected); // Outputs
 
 // MAIN
 void setup()
@@ -66,22 +69,27 @@ void setup()
   }
 
   setupBluetooth();
-  tOut.enable(); // Start output loop
-
   DebugOut("### Setup Done");
+
+  delay(1);
+  tIn.enable(); // Start output loop
+  tOut.enable(); // Start output loop
 }
 
 // Main
+void connectLoop()
+{
+  Connected = connected();
+}
+
 void inputLoop()
 {
-  if (connected())
-    gamepadData = input(currentType);
+  gamepadData = input(currentType);
 }
 
 void outputLoop()
 {
-  if (connected())
-    output(currentType, gamepadData);
+  output(currentType, gamepadData);
 }
 
 void loop()

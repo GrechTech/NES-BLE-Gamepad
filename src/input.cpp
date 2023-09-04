@@ -139,7 +139,7 @@ inline uint16_t readZapper() // Read the zapper light and trigger pins
 {
   uint16_t data = 0;
 
-  if(digitalRead(LIGHT_PIN)) 
+  if(digitalRead(LIGHT_PIN)) // (Inverted)
     data += 1;
 
   if(digitalRead(TRIGG_PIN))

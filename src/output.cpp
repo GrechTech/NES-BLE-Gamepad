@@ -13,6 +13,24 @@ bool connected() // Check if Bluetooth connected
   return bleGamepad.isConnected();
 }
 
+inline void outputDirect(bool press, uint8_t input) // Output a button directly
+{
+  if(press)
+    bleGamepad.press(input);
+  else
+    bleGamepad.release(input);
+
+  if (DEBUG)
+  {
+    Serial.print("# BTN: ");
+    Serial.print(input);
+    if(press)
+      Serial.println(" Pressed");
+    else
+      Serial.println(" Released");
+  }
+}
+
 void setupBluetooth() // Setup the Bluetooth gamepad service
 {
   bleGamepad.deviceName = "NES BLE Gamepad";
@@ -33,25 +51,12 @@ void setupBluetooth() // Setup the Bluetooth gamepad service
 
   bleGamepad.begin(&bleGamepadConfig);
 
+  if(zapperPad)
+    outputDirect(true,B_BUTTON);
+
   DebugOut("##### Done Setup BLE");
-}
 
-inline void outputDirect(bool press, uint8_t input) // Output a button directly
-{
-  if(press)
-    bleGamepad.press(input);
-  else
-    bleGamepad.release(input);
-
-  if (DEBUG)
-  {
-    Serial.print("# BTN: ");
-    Serial.print(input);
-    if(press)
-      Serial.println(" Pressed");
-    else
-      Serial.println(" Released");
-  }
+  bleGamepad.sendReport();
 }
 
 inline void pressSelect(bool input) // Press the select button
@@ -285,12 +290,12 @@ inline void outputZapper(uint16_t zapperData, uint16_t prevPadData) // Output us
   if(Light && !prevLight) 
   {
     lightTime = millis();
-    DebugOut("Light Off (Inverted)");
+    DebugOut("Light On");
     outputDirect(false,B_BUTTON);
   }
   else if(!Light && prevLight && (millis() - lightTime > LIGHT_PERIOD)) 
   {
-    DebugOut("Light On (Inverted)");
+    DebugOut("Light Off");
     outputDirect(true,B_BUTTON);
   }
 
