@@ -275,22 +275,51 @@ inline void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData) // Outpu
   }
 }
 
-inline void outputZapper(uint8_t zapperData, uint8_t prevPadData) // Output using zapper data
+inline void outputZapper(uint16_t zapperData, uint16_t prevPadData) // Output using zapper data
 {    
-  if(zapperData != prevPadData) // If state changed
+  const bool Light = bitRead(zapperData,0);
+  const bool Trigger = bitRead(zapperData,1);
+  const bool prevLight = bitRead(prevPadData,0);
+  const bool prevTrigger = bitRead(prevPadData,1);
+
+  static bool prevTriggResetData = false;// Previous state of Zapper trigger reset
+  static unsigned long triggerTime = 0;  // Time of last trigger pull
+  static unsigned long lightTime = 0;    // Time of last light sense
+
+  if(Light && !prevLight) 
   {
-    if(zapperData % 2 == 1) // LIGHT
-      outputDirect(true,B_BUTTON);
-    else
-      outputDirect(false,B_BUTTON);
-
-    if(zapperData > 1) // TRIGG
-      outputDirect(true,BUTTON_1);
-    else
-      outputDirect(false,BUTTON_1);
-
-    bleGamepad.sendReport();
+    lightTime = millis();
+    DebugOut("Light Off (Inverted)");
+    outputDirect(false,B_BUTTON);
   }
+  else if(!Light && prevLight && (millis() - lightTime > LIGHT_PERIOD)) 
+  {
+    DebugOut("Light On (Inverted)");
+    outputDirect(true,B_BUTTON);
+  }
+
+  if(Trigger && !prevTrigger)
+  {
+    prevTriggResetData = false;
+    triggerTime = millis();
+    DebugOut("Trigger On");    
+    outputDirect(true,BUTTON_1);
+  }
+  else if(Trigger && prevTrigger && !prevTriggResetData && (millis() - triggerTime > TRIGGER_PERIOD))
+  {
+    prevTriggResetData = true;
+    DebugOut("Trigger Release");
+    outputDirect(false,BUTTON_1);
+  }
+  else if(!Trigger && prevTrigger && (millis() - triggerTime > TRIGGER_PERIOD))
+  {
+    prevTriggResetData = false;
+    DebugOut("Trigger Off");
+    outputDirect(false,BUTTON_1);
+  } 
+
+  if(zapperData != prevPadData) // If state changed
+    bleGamepad.sendReport();
 }
 
 void output(padTypes currentType, uint16_t gamepadData)

@@ -128,75 +128,22 @@ inline uint16_t readShiftReg(bool powerpad) // read 4021 shift register(s)
     delayMicroseconds(2);
   }
 
-  if (DEBUG_ADV)
-  {
-    Serial.println();
-    Serial.print("Game Pad Data: ");
-    Serial.println(gamepadData, BIN);
-    Serial.print("Power Pad Data: ");
-    Serial.print(powerpadData1, BIN);
-    Serial.print(" ");
-    Serial.println(powerpadData2, BIN);
-  }
-
   if(powerpad)
-    return ((256U * (uint16_t)powerpadData1) + (uint16_t)powerpadData2) >> 4; 
     // Combine two (8-bit unsigned) bytes into one 16-bit unsigned integer
+    return ((256U * (uint16_t)powerpadData1) + (uint16_t)powerpadData2) >> 4; 
   else
     return (uint16_t)gamepadData;
 }
 
 inline uint16_t readZapper() // Read the zapper light and trigger pins
 {
-  static bool prevTriggData = false;     // Previous state of Zapper trigger
-  static bool prevTriggResetData = false;// Previous state of Zapper trigger reset
-  static bool prevLightData = true;      // Previous state of Zapper light sensor
-  static unsigned long triggerTime = 0;  // Time of last trigger pull
-  static unsigned long lightTime = 0;    // Time of last light sense
-
-  bool changed = false;
   uint16_t data = 0;
 
-  if(digitalRead(LIGHT_PIN) && !prevLightData) 
-  {
-    prevLightData = true;
-    changed = true;
-    lightTime = millis();
-    DebugOut("Light On (Inverted)");
-    
-    data = 1;
-  }
-  else if(!digitalRead(LIGHT_PIN) && prevLightData && (millis() - lightTime > LIGHT_PERIOD)) 
-  {
-    prevLightData = false;
-    changed = true;
-    DebugOut("Light Off (Inverted)");
-  }
+  if(digitalRead(LIGHT_PIN)) 
+    data += 1;
 
-  if(digitalRead(TRIGG_PIN) && !prevTriggData)
-  {
-    prevTriggData = true;
-    prevTriggResetData = false;
-    changed = true;
-    triggerTime = millis();
-    DebugOut("Trigger On");    
-
+  if(digitalRead(TRIGG_PIN))
     data += 2;
-  }
-  else if(digitalRead(TRIGG_PIN) && prevTriggData && !prevTriggResetData && (millis() - triggerTime > TRIGGER_PERIOD))
-  {
-    prevTriggData = true;
-    prevTriggResetData = true;
-    changed = true;
-    DebugOut("Trigger Release");
-  }
-  else if(!digitalRead(TRIGG_PIN) && prevTriggData && (millis() - triggerTime > TRIGGER_PERIOD))
-  {
-    prevTriggData = false;
-    prevTriggResetData = false;
-    changed = true;
-    DebugOut("Trigger Off");
-  }
 
   return data;
 }

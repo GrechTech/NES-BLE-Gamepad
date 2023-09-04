@@ -65,7 +65,7 @@ void setup()
       pinMode(TRIGG_PIN, INPUT_PULLUP); // Tomee Zapp has a simple switch NC to GND. 
       // When trigger pulled, switch disconnected from GND allowing it to be pulled up
       
-      tOut.setInterval(2 * TASK_MILLISECOND); // 500 Hz
+      tOut.setInterval(1 * TASK_MILLISECOND); // 500 Hz
       DebugOut("#### Done Setup Zapper Pad");
       break;
   }

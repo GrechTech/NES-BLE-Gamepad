@@ -21,7 +21,6 @@ const bool COMPRESS_POWERPAD = false; // Compress the powerpad buttons into the 
 const bool EMULATOR_MAPPING = false; // Remap Select for use with on cosnole emulators
 // DEBUG CONFIG
 const bool DEBUG = false; // Enable for serial monitor priority debug outputs
-const bool DEBUG_ADV = false; // Enable for serial monitor advanced debug outputs
 const bool OUTPUT_TEST = false; // Enable for serial monitor advanced debug outputs
 
 // ENUMERATIONS
