@@ -24,14 +24,10 @@ void setupBluetooth() // Setup the Bluetooth gamepad service
   bleGamepadConfig.setIncludeSlider1(false);
   bleGamepadConfig.setIncludeSlider2(false);
 
-  if(COMPRESS_POWERPAD)
-    bleGamepadConfig.setButtonCount(6);  // Half buttons required with compressed scheme
-  else
-    bleGamepadConfig.setButtonCount(12);  
+  bleGamepadConfig.setButtonCount(12);  
 
   bleGamepadConfig.setIncludeStart(true);
-  if(!EMULATOR_MAPPING)
-    bleGamepadConfig.setIncludeSelect(true);
+  bleGamepadConfig.setIncludeSelect(true);
   
   bleGamepadConfig.setAutoReport(false); // Manually handle reports, for performance
 
