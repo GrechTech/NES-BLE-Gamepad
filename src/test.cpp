@@ -1,6 +1,6 @@
 #include "main.h"
 
-const uint16_t period = 1000; // ~ two seconds
+const uint16_t period = 2000; // ~ two seconds
 
 // Press every powerpad button, incrementing every 2 seconds
 uint16_t testPowerpad()

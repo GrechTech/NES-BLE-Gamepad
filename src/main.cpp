@@ -12,8 +12,8 @@ void outputLoop(); // Outputs loop (Update BT)
 Scheduler ts; //Task Scheduluer
 
 //Tasks
-Task tIn  ( 2 * TASK_MILLISECOND, TASK_FOREVER , &inputLoop,  &ts, true ); // Inputs
-Task tOut ( 2 * TASK_MILLISECOND, TASK_FOREVER , &outputLoop, &ts, false ); // Outputs
+Task tIn  ( 1 * TASK_MILLISECOND, TASK_FOREVER , &inputLoop,  &ts, true ); // Inputs
+Task tOut ( 1 * TASK_MILLISECOND, TASK_FOREVER , &outputLoop, &ts, false ); // Outputs
 
 // MAIN
 void setup()
@@ -23,7 +23,6 @@ void setup()
   if (DEBUG)
     Serial.begin(115200);
   DebugOut("### Setup Start");
-
 
   if(OUTPUT_TEST)
     currentType = powerPad;
@@ -45,7 +44,6 @@ void setup()
     case gamePad: // Setup gamepad
       DebugOut("### Start Setup Game Pad");
       setupShiftReg();
-      tOut.setInterval(2 * TASK_MILLISECOND); // 500 Hz
       DebugOut("#### Done Setup Game Pad");
       break;
 
@@ -54,8 +52,6 @@ void setup()
       setupShiftReg();
       if(COMPRESS_POWERPAD)
         tOut.setInterval(COMPRESS_SPEED * TASK_MILLISECOND); // 60 Hz
-      else
-        tOut.setInterval(16 * TASK_MILLISECOND); // 60 Hz
       DebugOut("#### Done Setup Power Pad");
       break;
 
@@ -65,7 +61,6 @@ void setup()
       pinMode(TRIGG_PIN, INPUT_PULLUP); // Tomee Zapp has a simple switch NC to GND. 
       // When trigger pulled, switch disconnected from GND allowing it to be pulled up
       
-      tOut.setInterval(1 * TASK_MILLISECOND); // 500 Hz
       DebugOut("#### Done Setup Zapper Pad");
       break;
   }
