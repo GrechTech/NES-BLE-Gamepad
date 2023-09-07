@@ -1,5 +1,4 @@
 #include "main.h"
-#include <TaskScheduler.h>
 
 // REGISTERS
 padTypes currentType = noPad; // Stores the current pad type
