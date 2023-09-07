@@ -291,6 +291,7 @@ inline void outputZapper() // Output using zapper data
   static bool prevTrigger = false;
   static bool prevTriggResetData = false;// Previous state of Zapper trigger reset
   static unsigned long triggerTime = 0;  // Time of last trigger pull
+  static unsigned long lightTime = 0;    // Time of last light sense
   bool changed = false;
 
   if(digitalRead(LIGHT_PIN) && !prevLight) 
@@ -300,7 +301,7 @@ inline void outputZapper() // Output using zapper data
     DebugOut("Light Off");
     outputDirect(false,BUTTON_1);
   }
-  else if(!digitalRead(LIGHT_PIN) && prevLight) 
+  else if(!digitalRead(LIGHT_PIN) && prevLight  && (millis() - lightTime > LIGHT_PERIOD)) 
   {
     changed = true;
     prevLight = false;
