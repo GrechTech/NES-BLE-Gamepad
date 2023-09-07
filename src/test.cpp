@@ -18,11 +18,6 @@ uint16_t testPowerpad()
     {
       outputData = pow(2, n);
       outputData = ~outputData;
-      if(DEBUG && outputData != prevData)
-      {
-        Serial.print("Unit: ");Serial.print(n);
-        Serial.print(" Data: ");Serial.println(outputData, BIN);
-      }
     }
   }
 

@@ -14,7 +14,7 @@ void connectLoop(); // Outputs loop (Update BT)
 Scheduler ts; //Task Scheduluer
 
 //Tasks
-Task tCon ( 1 * TASK_SECOND,      TASK_FOREVER, &connectLoop,   &ts, true); // Connections check
+Task tCon ( 1 * TASK_SECOND,      TASK_FOREVER, &connectLoop,   &ts, false); // Connections check
 Task tIn  ( 1 * TASK_MILLISECOND, TASK_FOREVER, &inputLoop,     &ts, Connected); // Inputs
 Task tOut ( 1 * TASK_MILLISECOND, TASK_FOREVER, &outputLoop,    &ts, Connected); // Outputs
 
@@ -72,6 +72,7 @@ void setup()
   DebugOut("### Setup Done");
 
   delay(1);
+  tCon.enable();
   tIn.enable(); // Start output loop
   tOut.enable(); // Start output loop
 }

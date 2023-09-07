@@ -198,53 +198,61 @@ inline void outputGamepad(uint8_t gamepadData, uint8_t prevPadData) // Output us
 
 inline void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData) // Output using powerpad value data
 {
-  static bool frameFlag = false;       // For alternating outputs in compressed powerpad mode
-
   if(COMPRESS_POWERPAD) // If using the compressed scheme for NESLCD ROM patches
   {
-    frameFlag = !frameFlag; // Invert the boolean on each call
-    uint8_t startVal = 0;
-    uint8_t endVal = 0;
-
-    // Reset output values
-    bleGamepad.setHat(HAT_CENTERED);
-    bleGamepad.releaseStart();
-    pressSelect(false);
-    bleGamepad.release(BUTTON_1);
-    bleGamepad.release(B_BUTTON);
-
-    // Set new outputs
-    if(frameFlag)          // If on an odd case, use Select and Buttons 1-5
+    for(uint8_t n = 0; n < 12; n++)
     {
-      pressSelect(true);
-      startVal = 0;
-      endVal = 6;
-    }
-    else          // If on an even case, use Start and Buttons 6-12
-    {
-      bleGamepad.pressStart();
-      startVal = 6;
-      endVal = 12;
-    }
-
-    for(uint8_t n = startVal; n < endVal; n++)
-    {
-      if(bitRead(powerpadData, 11 - n) == LOW) // Inverted
+      if(bitRead(powerpadData, 11 - n) == LOW && bitRead(prevPadData, 11 - n) == HIGH) // Inverted
       {
         // the compressed scheme for NESLCD ROM patches
         uint8_t btn = PowerPadBtnMap[n];
         if (btn == 0 or btn == 6)
+        {
           bleGamepad.setHat(HAT_UP); 
+          bleGamepad.release(BUTTON_1);
+          bleGamepad.release(B_BUTTON);
+        }
         else if (btn == 1 or btn == 7)
+        {
           bleGamepad.setHat(HAT_RIGHT);
+          bleGamepad.release(BUTTON_1);
+          bleGamepad.release(B_BUTTON);
+        }
         else if (btn == 2 or btn == 8)
+        {
           bleGamepad.setHat(HAT_DOWN);
+          bleGamepad.release(BUTTON_1);
+          bleGamepad.release(B_BUTTON);
+        }
         else if (btn == 3 or btn == 9)
+        {
           bleGamepad.setHat(HAT_LEFT);
+          bleGamepad.release(BUTTON_1);
+          bleGamepad.release(B_BUTTON);
+        }
         else if (btn == 4 or btn == 10)
+        {
           bleGamepad.press(BUTTON_1);
+          bleGamepad.setHat(HAT_CENTERED);
+          bleGamepad.release(B_BUTTON);
+        }
         else if (btn == 5 or btn == 11)
+        {
           bleGamepad.press(B_BUTTON);
+          bleGamepad.release(BUTTON_1);
+          bleGamepad.setHat(HAT_CENTERED);
+        }
+        
+        if(btn > 5)
+        {
+          bleGamepad.pressStart();
+          pressSelect(false);
+        }
+        else
+        {
+          bleGamepad.releaseStart();
+          pressSelect(true);
+        }
 
         if(DEBUG)
         {
@@ -254,6 +262,7 @@ inline void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData) // Outpu
           Serial.print(12 - n);
           Serial.println(" ) Pressed");
         }
+        break;
       }
     }
 
@@ -291,12 +300,12 @@ inline void outputZapper(uint16_t zapperData, uint16_t prevPadData) // Output us
   {
     lightTime = millis();
     DebugOut("Light On");
-    outputDirect(false,B_BUTTON);
+    outputDirect(false,BUTTON_1);
   }
   else if(!Light && prevLight && (millis() - lightTime > LIGHT_PERIOD)) 
   {
     DebugOut("Light Off");
-    outputDirect(true,B_BUTTON);
+    outputDirect(true,BUTTON_1);
   }
 
   if(Trigger && !prevTrigger)
@@ -304,19 +313,19 @@ inline void outputZapper(uint16_t zapperData, uint16_t prevPadData) // Output us
     prevTriggResetData = false;
     triggerTime = millis();
     DebugOut("Trigger On");    
-    outputDirect(true,BUTTON_1);
+    outputDirect(true,B_BUTTON);
   }
   else if(Trigger && prevTrigger && !prevTriggResetData && (millis() - triggerTime > TRIGGER_PERIOD))
   {
     prevTriggResetData = true;
     DebugOut("Trigger Release");
-    outputDirect(false,BUTTON_1);
+    outputDirect(false,B_BUTTON);
   }
   else if(!Trigger && prevTrigger && (millis() - triggerTime > TRIGGER_PERIOD))
   {
     prevTriggResetData = false;
     DebugOut("Trigger Off");
-    outputDirect(false,BUTTON_1);
+    outputDirect(false,B_BUTTON);
   } 
 
   if(zapperData != prevPadData) // If state changed
