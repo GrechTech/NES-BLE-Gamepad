@@ -17,10 +17,10 @@ const uint16_t TRIGGER_PERIOD = 100;   // Trigger debounce & reset time (ms)
 const uint16_t LIGHT_PERIOD = 20;      // Light sensor input debounce time (ms)
 const uint8_t COMPRESS_SPEED = 16; // (ms) How often the powerpad output loop cycles in compression mode
 const uint8_t B_BUTTON_EMU_OFFSET = 2; // BUTTON_4 in emulator mode
-const bool COMPRESS_POWERPAD = false; // Compress the powerpad buttons into the NES gamepad buttons, for use with custom ROMs
-const bool EMULATOR_MAPPING = false; // Remap Select for use with on cosnole emulators
+const bool COMPRESS_POWERPAD = true; // Compress the powerpad buttons into the NES gamepad buttons, for use with custom ROMs
+const bool EMULATOR_MAPPING = true; // Remap Select for use with on cosnole emulators
 // DEBUG CONFIG
-const bool DEBUG = false; // Enable for serial monitor priority debug outputs
+const bool DEBUG = true; // Enable for serial monitor priority debug outputs
 const bool OUTPUT_TEST = false; // Enable for serial monitor advanced debug outputs
 
 // ENUMERATIONS

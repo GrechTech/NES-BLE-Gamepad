@@ -135,19 +135,6 @@ inline uint16_t readShiftReg(bool powerpad) // read 4021 shift register(s)
     return (uint16_t)gamepadData;
 }
 
-inline uint16_t readZapper() // Read the zapper light and trigger pins
-{
-  uint16_t data = 0;
-
-  if(digitalRead(LIGHT_PIN)) // (Inverted)
-    data += 1;
-
-  if(digitalRead(TRIGG_PIN))
-    data += 2;
-
-  return data;
-}
-
 uint16_t input(padTypes currentType)
 {
   if(OUTPUT_TEST)
@@ -156,8 +143,6 @@ uint16_t input(padTypes currentType)
     return readShiftReg(false); // Get state
   else if(currentType == powerPad)
     return readShiftReg(true); // Get state
-  else if(currentType == zapperPad)
-    return readZapper();
   else
     return 0;
 }

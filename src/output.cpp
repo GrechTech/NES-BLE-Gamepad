@@ -285,50 +285,56 @@ inline void outputPowerpad(uint16_t powerpadData, uint16_t prevPadData) // Outpu
   }
 }
 
-inline void outputZapper(uint16_t zapperData, uint16_t prevPadData) // Output using zapper data
+inline void outputZapper() // Output using zapper data
 {    
-  const bool Light = bitRead(zapperData,0);
-  const bool Trigger = bitRead(zapperData,1);
-  const bool prevLight = bitRead(prevPadData,0);
-  const bool prevTrigger = bitRead(prevPadData,1);
-
+  static bool prevLight = true;
+  static bool prevTrigger = false;
   static bool prevTriggResetData = false;// Previous state of Zapper trigger reset
   static unsigned long triggerTime = 0;  // Time of last trigger pull
-  static unsigned long lightTime = 0;    // Time of last light sense
+  bool changed = false;
 
-  if(Light && !prevLight) 
+  if(digitalRead(LIGHT_PIN) && !prevLight) 
   {
-    lightTime = millis();
-    DebugOut("Light On");
+    changed = true;
+    prevLight = true;
+    DebugOut("Light Off");
     outputDirect(false,BUTTON_1);
   }
-  else if(!Light && prevLight && (millis() - lightTime > LIGHT_PERIOD)) 
+  else if(!digitalRead(LIGHT_PIN) && prevLight) 
   {
-    DebugOut("Light Off");
+    changed = true;
+    prevLight = false;
+    DebugOut("Light On");
     outputDirect(true,BUTTON_1);
   }
 
-  if(Trigger && !prevTrigger)
+  if(digitalRead(TRIGG_PIN) && !prevTrigger)
   {
+    changed = true;
+    prevTrigger = true;
     prevTriggResetData = false;
     triggerTime = millis();
     DebugOut("Trigger On");    
     outputDirect(true,B_BUTTON);
   }
-  else if(Trigger && prevTrigger && !prevTriggResetData && (millis() - triggerTime > TRIGGER_PERIOD))
+  else if(digitalRead(TRIGG_PIN)  && prevTrigger && !prevTriggResetData && (millis() - triggerTime > TRIGGER_PERIOD))
   {
+    changed = true;
+    prevTrigger = true;
     prevTriggResetData = true;
     DebugOut("Trigger Release");
     outputDirect(false,B_BUTTON);
   }
-  else if(!Trigger && prevTrigger && (millis() - triggerTime > TRIGGER_PERIOD))
+  else if(!digitalRead(TRIGG_PIN)  && prevTrigger && (millis() - triggerTime > TRIGGER_PERIOD))
   {
+    changed = true;
+    prevTrigger = false;
     prevTriggResetData = false;
     DebugOut("Trigger Off");
     outputDirect(false,B_BUTTON);
   } 
 
-  if(zapperData != prevPadData) // If state changed
+  if(changed) // If state changed
     bleGamepad.sendReport();
 }
 
@@ -341,7 +347,7 @@ void output(padTypes currentType, uint16_t gamepadData)
   else if(currentType == powerPad)
     outputPowerpad(gamepadData, prevPadData);
   else if(currentType == zapperPad)
-    outputZapper(gamepadData, prevPadData);
+    outputZapper();
 
   prevPadData = gamepadData;
 }
