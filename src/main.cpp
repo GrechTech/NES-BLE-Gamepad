@@ -51,8 +51,8 @@ inline void setupBluetooth() // Setup the Bluetooth gamepad service
   bleGamepadConfig.setIncludeSlider2(false);
 
   bleGamepadConfig.setButtonCount(12);  
-  bleGamepadConfig.setIncludeStart(true);
-  bleGamepadConfig.setIncludeSelect(true);
+  bleGamepadConfig.setIncludeStart(false);
+  bleGamepadConfig.setIncludeSelect(false);
   
   bleGamepadConfig.setAutoReport(false); // Manually handle reports, for performance
 
@@ -209,12 +209,20 @@ inline uint16_t readShiftReg(bool powerpad = false)
   }
 }
 
+inline void pressStart(bool input) // Press the select button
+{
+  if(input)
+    bleGamepad.press(BUTTON_12);
+  else
+    bleGamepad.release(BUTTON_12);
+}
+
 inline void pressSelect(bool input) // Press the select button
 {
   if(input)
-    bleGamepad.press(BUTTON_5);
+    bleGamepad.press(BUTTON_8);
   else
-    bleGamepad.release(BUTTON_5);
+    bleGamepad.release(BUTTON_8);
 }
 
 inline void readGamepad()
@@ -276,7 +284,7 @@ inline void readGamepad()
 
     if((bitRead(gamepadData , 7 - 3) == LOW) && (bitRead(prevPadData , 7 - 3) == HIGH))
     {
-      bleGamepad.pressStart();
+      pressStart(true);
       if (DEBUG)
       {
         Serial.println("# BTN: Start Pressed");
@@ -285,7 +293,7 @@ inline void readGamepad()
     }
     else if((bitRead(gamepadData , 7 - 3) == HIGH) && (bitRead(prevPadData , 7 - 3) == LOW))
     {
-      bleGamepad.releaseStart();
+      pressStart(false);
       if (DEBUG)
       {
         Serial.println("# BTN: Start Released");
@@ -451,12 +459,12 @@ inline void readPowerpad()
         
         if(btn > 5)
         {
-          bleGamepad.pressStart();
+          pressStart(true);
           pressSelect(false);
         }
         else
         {
-          bleGamepad.releaseStart();
+          pressStart(false);
           pressSelect(true);
         }
 
