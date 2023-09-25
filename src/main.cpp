@@ -457,7 +457,7 @@ inline void readPowerpad()
           bleGamepad.setHat(HAT_CENTERED);
         }
         
-        if(btn > 5)
+        if(btn > 6)
         {
           pressStart(true);
           pressSelect(false);
