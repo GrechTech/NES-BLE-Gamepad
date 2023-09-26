@@ -165,7 +165,9 @@ inline uint16_t readShiftReg(bool powerpad = false)
     return powerpadData;
   }
   else
+  {
     return (uint16_t)gamepadData;
+  }
 }
 
 inline void pressStart(bool input) // Press the select button
@@ -329,65 +331,71 @@ inline void readGamepad()
 inline void readPowerpad()
 {
   // Button map reference https://www.nesdev.org/wiki/Power_Pad
-  const uint8_t PowerPadBtnMap [12] = {2, 1, 5, 9, 6, 10, 11, 7, 4, 3, 12, 8};
-  static bool toggleOutput = false; 
-  toggleOutput = !toggleOutput;
+  static const uint8_t PowerPadBtnMap [12] = {2, 1, 5, 9, 6, 10, 11, 7, 4, 3, 12, 8};
+  static bool toggleDevice = false;
+  toggleDevice != toggleDevice;
 
   uint16_t powerpadData = readShiftReg(true); // Get state
 
-  //#pragma unroll
-  for(int n = 0; n < 12; n++)
+  uint8_t start, end;
+
+  if(toggleDevice)
+  {
+    pressStart(true);
+    pressSelect(false);
+    start = 6;
+    end = 12;
+  }
+  else
+  {
+    pressStart(false);
+    pressSelect(true);
+    start = 0;
+    end = 6;
+  }
+
+  #pragma unroll
+  for(int n = start; n < end; n++)
   {
     if(bitRead(powerpadData, 11 - n) == LOW && bitRead(prevPadData, 11 - n) == HIGH) // Inverted
     {
       // the compressed scheme for NESLCD ROM patches
       uint8_t btn = PowerPadBtnMap[n];
-      if ( (btn == 1 && toggleOutput == false) || (btn == 1+6 && toggleOutput == true) )
+      if (btn == 1 or btn == 1+6)
       {
         bleGamepad.setHat(HAT_UP); 
         bleGamepad.release(BUTTON_1);
         bleGamepad.release(BUTTON_4);
       }
-      else if ((btn == 2 && toggleOutput == false) || (btn == 2+6 && toggleOutput == true))
+      else if (btn == 2 or btn == 2+6)
       {
         bleGamepad.setHat(HAT_RIGHT);
         bleGamepad.release(BUTTON_1);
         bleGamepad.release(BUTTON_4);
       }
-      else if ((btn == 3 && toggleOutput == false) || (btn == 3+6 && toggleOutput == true))
+      else if (btn == 3 or btn == 3+6)
       {
         bleGamepad.setHat(HAT_DOWN);
         bleGamepad.release(BUTTON_1);
         bleGamepad.release(BUTTON_4);
       }
-      else if ((btn == 4 && toggleOutput == false) || (btn == 4+6 && toggleOutput == true))
+      else if (btn == 4 or btn == 4+6)
       {
         bleGamepad.setHat(HAT_LEFT);
         bleGamepad.release(BUTTON_1);
         bleGamepad.release(BUTTON_4);
       }
-      else if ((btn == 5 && toggleOutput == false) || (btn == 5+6 && toggleOutput == true))
+      else if (btn == 5 or btn == 5+6)
       {
         bleGamepad.press(BUTTON_1);
         bleGamepad.setHat(HAT_CENTERED);
         bleGamepad.release(BUTTON_4);
       }
-      else if ((btn == 6 && toggleOutput == false) || (btn == 6+6 && toggleOutput == true))
+      else if (btn == 6 or btn == 6+6)
       {
         bleGamepad.press(BUTTON_4);
         bleGamepad.release(BUTTON_1);
         bleGamepad.setHat(HAT_CENTERED);
-      }
-      
-      if(btn > 6 && toggleOutput == false)
-      {
-        pressStart(true);
-        pressSelect(false);
-      }
-      else if(btn <= 6 && toggleOutput == true)
-      {
-        pressStart(false);
-        pressSelect(true);
       }
 
       if(DEBUG)
@@ -403,13 +411,13 @@ inline void readPowerpad()
   bleGamepad.sendReport();
 
   prevPadData = powerpadData;
-  delay(14); // (14 + 2 ms)
+  delay(14);
 }
 
 inline void readZapper()
 {
-  const uint16_t lightPeriod = 20;      // Light sensor input debounce time (ms)
   const uint16_t triggerPeriod = 100;   // Trigger debounce & reset time (ms)
+  const uint16_t lightPeriod = 20;      // Light sensor input debounce time (ms)
   static bool prevTriggData = false;     // Previous state of Zapper trigger
   static bool prevTriggResetData = false;// Previous state of Zapper trigger reset
   static bool prevLightData = true;      // Previous state of Zapper light sensor
@@ -549,22 +557,23 @@ void setup()
     Serial.println("### Setup Start");
   }
 
-  if(type == noPad)
+  if(forceMode == noPad)
   {
     if (DEBUG)
-      Serial.print("### Auto Detect Start");
+      Serial.println("### Auto Detect Start");
 
     while (type == noPad)
-    {
       type = detectType();
-    } 
+
+    if (DEBUG)
+      Serial.println("### Auto Detect Complete");
   }
 
   if(type == gamePad)
     setupGamepad();
-  else if(type == gamePad)
+  else if(type == powerPad)
     setupPowerpad();
-  else if(type == gamePad)
+  else if(type == zapperPad)
     setupZapper();
 
   if (DEBUG)
@@ -577,9 +586,9 @@ void loop()
   {
     if(currentType == gamePad)
       readGamepad();
-    else if(currentType == gamePad)
+    else if(currentType == powerPad)
       readPowerpad();
-    else if(currentType == gamePad)
+    else if(currentType == zapperPad)
       readZapper();
   }
 
