@@ -25,8 +25,6 @@ enum padTypes // Defines the supported types of NES controller input
 //---------- CONFIG ----------//
 const padTypes forceMode = noPad; // Force a given pad mode, Auto detect if noPad selected
 const bool DEBUG = false; // Enable for serial monitor priority debug outputs
-const uint16_t triggerPeriod = 100;   // Trigger debounce & reset time (ms)
-const uint16_t lightPeriod = 20;      // Light sensor input debounce time (ms)
 //---------- CONFIG ----------//
 
 // REGISTERS
@@ -58,9 +56,7 @@ inline void setupBluetooth() // Setup the Bluetooth gamepad service
   bleGamepad.begin(&bleGamepadConfig);
 
   if (DEBUG)
-  {
     Serial.println("##### Done Setup BLE");
-  }
 }
 
 inline void setupShiftReg() // Setup pins to read 4021 shift register(s)
@@ -76,9 +72,7 @@ inline void setupShiftReg() // Setup pins to read 4021 shift register(s)
   digitalWrite(CLOCK_PIN,HIGH);
 
   if (DEBUG)
-  {
     Serial.println("##### Done Setup Latch");
-  }
 }
 
 
@@ -91,9 +85,7 @@ inline void setupGamepad()
   currentType = gamePad;
 
   if (DEBUG)
-  {
     Serial.println("#### Done Setup Game Pad");
-  }
 }
 
 inline void setupPowerpad()
@@ -104,9 +96,7 @@ inline void setupPowerpad()
   currentType = powerPad;
 
   if (DEBUG)
-  {
     Serial.println("#### Done Setup Power Pad");
-  }
 }
 
 inline void setupZapper()
@@ -119,9 +109,7 @@ inline void setupZapper()
   currentType = zapperPad;
 
   if (DEBUG)
-  {
     Serial.println("#### Done Setup Zapper Pad");
-  }
 }
 
 
@@ -177,9 +165,7 @@ inline uint16_t readShiftReg(bool powerpad = false)
     return powerpadData;
   }
   else
-  {
     return (uint16_t)gamepadData;
-  }
 }
 
 inline void pressStart(bool input) // Press the select button
@@ -343,85 +329,87 @@ inline void readGamepad()
 inline void readPowerpad()
 {
   // Button map reference https://www.nesdev.org/wiki/Power_Pad
-  static const uint8_t PowerPadBtnMap [12] = {2, 1, 5, 9, 6, 10, 11, 7, 4, 3, 12, 8};
+  const uint8_t PowerPadBtnMap [12] = {2, 1, 5, 9, 6, 10, 11, 7, 4, 3, 12, 8};
+  static bool toggleOutput = false; 
+  toggleOutput = !toggleOutput;
 
   uint16_t powerpadData = readShiftReg(true); // Get state
 
-  if(powerpadData != prevPadData) // If state changed
+  //#pragma unroll
+  for(int n = 0; n < 12; n++)
   {
-    for(int n = 0; n < 12; n++)
+    if(bitRead(powerpadData, 11 - n) == LOW && bitRead(prevPadData, 11 - n) == HIGH) // Inverted
     {
-      if(bitRead(powerpadData, 11 - n) == LOW && bitRead(prevPadData, 11 - n) == HIGH) // Inverted
+      // the compressed scheme for NESLCD ROM patches
+      uint8_t btn = PowerPadBtnMap[n];
+      if ( (btn == 1 && toggleOutput == false) || (btn == 1+6 && toggleOutput == true) )
       {
-        // the compressed scheme for NESLCD ROM patches
-        uint8_t btn = PowerPadBtnMap[n];
-        if (btn == 1 or btn == 1+6)
-        {
-          bleGamepad.setHat(HAT_UP); 
-          bleGamepad.release(BUTTON_1);
-          bleGamepad.release(BUTTON_4);
-        }
-        else if (btn == 2 or btn == 2+6)
-        {
-          bleGamepad.setHat(HAT_RIGHT);
-          bleGamepad.release(BUTTON_1);
-          bleGamepad.release(BUTTON_4);
-        }
-        else if (btn == 3 or btn == 3+6)
-        {
-          bleGamepad.setHat(HAT_DOWN);
-          bleGamepad.release(BUTTON_1);
-          bleGamepad.release(BUTTON_4);
-        }
-        else if (btn == 4 or btn == 4+6)
-        {
-          bleGamepad.setHat(HAT_LEFT);
-          bleGamepad.release(BUTTON_1);
-          bleGamepad.release(BUTTON_4);
-        }
-        else if (btn == 5 or btn == 5+6)
-        {
-          bleGamepad.press(BUTTON_1);
-          bleGamepad.setHat(HAT_CENTERED);
-          bleGamepad.release(BUTTON_4);
-        }
-        else if (btn == 6 or btn == 6+6)
-        {
-          bleGamepad.press(BUTTON_4);
-          bleGamepad.release(BUTTON_1);
-          bleGamepad.setHat(HAT_CENTERED);
-        }
-        
-        if(btn > 6)
-        {
-          pressStart(true);
-          pressSelect(false);
-        }
-        else
-        {
-          pressStart(false);
-          pressSelect(true);
-        }
+        bleGamepad.setHat(HAT_UP); 
+        bleGamepad.release(BUTTON_1);
+        bleGamepad.release(BUTTON_4);
+      }
+      else if ((btn == 2 && toggleOutput == false) || (btn == 2+6 && toggleOutput == true))
+      {
+        bleGamepad.setHat(HAT_RIGHT);
+        bleGamepad.release(BUTTON_1);
+        bleGamepad.release(BUTTON_4);
+      }
+      else if ((btn == 3 && toggleOutput == false) || (btn == 3+6 && toggleOutput == true))
+      {
+        bleGamepad.setHat(HAT_DOWN);
+        bleGamepad.release(BUTTON_1);
+        bleGamepad.release(BUTTON_4);
+      }
+      else if ((btn == 4 && toggleOutput == false) || (btn == 4+6 && toggleOutput == true))
+      {
+        bleGamepad.setHat(HAT_LEFT);
+        bleGamepad.release(BUTTON_1);
+        bleGamepad.release(BUTTON_4);
+      }
+      else if ((btn == 5 && toggleOutput == false) || (btn == 5+6 && toggleOutput == true))
+      {
+        bleGamepad.press(BUTTON_1);
+        bleGamepad.setHat(HAT_CENTERED);
+        bleGamepad.release(BUTTON_4);
+      }
+      else if ((btn == 6 && toggleOutput == false) || (btn == 6+6 && toggleOutput == true))
+      {
+        bleGamepad.press(BUTTON_4);
+        bleGamepad.release(BUTTON_1);
+        bleGamepad.setHat(HAT_CENTERED);
+      }
+      
+      if(btn > 6 && toggleOutput == false)
+      {
+        pressStart(true);
+        pressSelect(false);
+      }
+      else if(btn <= 6 && toggleOutput == true)
+      {
+        pressStart(false);
+        pressSelect(true);
+      }
 
-        if(DEBUG)
-        {
-          Serial.print("# BTN: ");
-          Serial.print(btn + 1);
-          Serial.print(" ( ");
-          Serial.print(12 - n);
-          Serial.println(" ) Pressed");
-        }
-        break;
+      if(DEBUG)
+      {
+        Serial.print("# BTN: ");
+        Serial.print(btn + 1);
+        Serial.print(" ( ");
+        Serial.print(12 - n);
+        Serial.println(" ) Pressed");
       }
     }
-    bleGamepad.sendReport();
   }
+  bleGamepad.sendReport();
 
   prevPadData = powerpadData;
+  delay(14); // (14 + 2 ms)
 }
 
 inline void readZapper()
 {
+  const uint16_t lightPeriod = 20;      // Light sensor input debounce time (ms)
+  const uint16_t triggerPeriod = 100;   // Trigger debounce & reset time (ms)
   static bool prevTriggData = false;     // Previous state of Zapper trigger
   static bool prevTriggResetData = false;// Previous state of Zapper trigger reset
   static bool prevLightData = true;      // Previous state of Zapper light sensor
@@ -561,7 +549,7 @@ void setup()
     Serial.println("### Setup Start");
   }
 
-  if(forceMode == noPad)
+  if(type == noPad)
   {
     if (DEBUG)
       Serial.print("### Auto Detect Start");
@@ -569,59 +557,30 @@ void setup()
     while (type == noPad)
     {
       type = detectType();
-
-      if (DEBUG)
-        Serial.print('.');
     } 
-
-    if (DEBUG)
-    {
-      Serial.println();
-      Serial.println("### Auto Detect Complete");
-    }
   }
 
-  switch(type)
-  {
-    case gamePad:
-      if (DEBUG)
-        Serial.println("### Start Setup Game Pad");
-      setupGamepad();
-      break;
-    case powerPad:
-      if (DEBUG)
-        Serial.println("### Start Setup Power Pad");
-      setupPowerpad();
-      break;
-    case zapperPad:
-      if (DEBUG)
-        Serial.println("### Start Setup Zapper");
-      setupZapper();
-      break;
-  }
+  if(type == gamePad)
+    setupGamepad();
+  else if(type == gamePad)
+    setupPowerpad();
+  else if(type == gamePad)
+    setupZapper();
 
   if (DEBUG)
-  {
     Serial.println("### Setup Done");
-  }
 }
 
 void loop()
 {
   if (bleGamepad.isConnected())
   {
-    switch(currentType)
-    {
-      case gamePad:
-        readGamepad();
-        break;
-      case powerPad:
-        readPowerpad();
-        break;
-      case zapperPad:
-        readZapper();
-        break;
-    }
+    if(currentType == gamePad)
+      readGamepad();
+    else if(currentType == gamePad)
+      readPowerpad();
+    else if(currentType == gamePad)
+      readZapper();
   }
 
   delay(2);
