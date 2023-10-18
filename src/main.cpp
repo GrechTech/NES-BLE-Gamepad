@@ -328,89 +328,93 @@ inline void readGamepad()
   prevPadData = (uint16_t)gamepadData;
 }
 
+inline uint16_t testPowerpad()
+{
+  const uint16_t period = 250; // ~ two seconds
+  uint16_t outputData = 0;
+  static uint16_t prevData = 0;
+  static unsigned int outputCount = 0;
+  
+  if(outputCount > period * 12)
+    outputCount = 0;
+    
+  for(int n = 0; n < 12; n++)
+  {
+    if(outputCount >  (period * n) && outputCount <= period * (n + 1) )
+    {
+      outputData = pow(2, n);
+      outputData = ~outputData;
+    }
+  }
+
+  outputCount++;
+  prevData = outputData;
+
+  return outputData;
+}
+
 inline void readPowerpad()
 {
   // Button map reference https://www.nesdev.org/wiki/Power_Pad
   static const uint8_t PowerPadBtnMap [12] = {2, 1, 5, 9, 6, 10, 11, 7, 4, 3, 12, 8};
   static bool toggleDevice = false;
-  toggleDevice != toggleDevice;
+  toggleDevice = !toggleDevice;
 
   uint16_t powerpadData = readShiftReg(true); // Get state
+  //uint16_t powerpadData = testPowerpad(); // Get state Test
 
-  uint8_t start, end;
+  uint8_t offset = 0;
 
   if(toggleDevice)
   {
     pressStart(true);
     pressSelect(false);
-    start = 6;
-    end = 12;
+    offset = 6;
   }
   else
   {
     pressStart(false);
     pressSelect(true);
-    start = 0;
-    end = 6;
   }
 
+  bleGamepad.release(BUTTON_1);
+  bleGamepad.release(BUTTON_4);
+  bleGamepad.setHat(HAT_CENTERED); 
+
   #pragma unroll
-  for(int n = start; n < end; n++)
+  for(int n = 0; n < 12; n++)
   {
-    if(bitRead(powerpadData, 11 - n) == LOW && bitRead(prevPadData, 11 - n) == HIGH) // Inverted
+    if(bitRead(powerpadData, 11 - n) == LOW) // Inverted
     {
       // the compressed scheme for NESLCD ROM patches
       uint8_t btn = PowerPadBtnMap[n];
-      if (btn == 1 or btn == 1+6)
-      {
+      
+      if (btn == (1 + offset))
         bleGamepad.setHat(HAT_UP); 
-        bleGamepad.release(BUTTON_1);
-        bleGamepad.release(BUTTON_4);
-      }
-      else if (btn == 2 or btn == 2+6)
-      {
+      else if (btn == (2 + offset))
         bleGamepad.setHat(HAT_RIGHT);
-        bleGamepad.release(BUTTON_1);
-        bleGamepad.release(BUTTON_4);
-      }
-      else if (btn == 3 or btn == 3+6)
-      {
+      else if (btn == (3 + offset))
         bleGamepad.setHat(HAT_DOWN);
-        bleGamepad.release(BUTTON_1);
-        bleGamepad.release(BUTTON_4);
-      }
-      else if (btn == 4 or btn == 4+6)
-      {
+      else if (btn == (4 + offset))
         bleGamepad.setHat(HAT_LEFT);
-        bleGamepad.release(BUTTON_1);
-        bleGamepad.release(BUTTON_4);
-      }
-      else if (btn == 5 or btn == 5+6)
-      {
+      else if (btn == (5 + offset))
         bleGamepad.press(BUTTON_1);
-        bleGamepad.setHat(HAT_CENTERED);
-        bleGamepad.release(BUTTON_4);
-      }
-      else if (btn == 6 or btn == 6+6)
-      {
+      else if (btn == (6 + offset))
         bleGamepad.press(BUTTON_4);
-        bleGamepad.release(BUTTON_1);
-        bleGamepad.setHat(HAT_CENTERED);
-      }
 
       if(DEBUG)
       {
         Serial.print("# BTN: ");
-        Serial.print(btn + 1);
+        Serial.print(btn);
         Serial.print(" ( ");
         Serial.print(12 - n);
-        Serial.println(" ) Pressed");
+        Serial.print(" ) Pressed ");
+        Serial.println(toggleDevice);
       }
     }
   }
   bleGamepad.sendReport();
 
-  prevPadData = powerpadData;
   delay(14);
 }
 
