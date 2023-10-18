@@ -369,7 +369,7 @@ inline void readPowerpad()
   {
     pressStart(true);
     pressSelect(false);
-    offset = 6;
+    offset = 2;
   }
   else
   {
@@ -393,13 +393,13 @@ inline void readPowerpad()
         bleGamepad.setHat(HAT_UP); 
       else if (btn == (2 + offset))
         bleGamepad.setHat(HAT_RIGHT);
-      else if (btn == (3 + offset))
-        bleGamepad.setHat(HAT_DOWN);
-      else if (btn == (4 + offset))
-        bleGamepad.setHat(HAT_LEFT);
       else if (btn == (5 + offset))
-        bleGamepad.press(BUTTON_1);
+        bleGamepad.setHat(HAT_DOWN);
       else if (btn == (6 + offset))
+        bleGamepad.setHat(HAT_LEFT);
+      else if (btn == (9 + offset))
+        bleGamepad.press(BUTTON_1);
+      else if (btn == (10 + offset))
         bleGamepad.press(BUTTON_4);
 
       if(DEBUG)
